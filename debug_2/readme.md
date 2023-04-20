@@ -5,7 +5,7 @@ Simulation is carried out with a sinusoidal primary current input and a open sec
 The model for core losses is a very simple one, just to get a uniform evaluation accross the different software platforms.
 The core magnetizing curves are obtained from measurement and extrapolated.
 
-For this simulation, Is = 0.02 A
+For this simulation, Is = 0.1 A for isotropic results and Is = 0.02 A for anisotropic case. I did this reduction because I thought that high saturatio levels were interfering.  
 
 The files are as described bellow:
  - Output_M/Iso_nLin_WindingPlot - esults from commercial software for current and induced voltage for isotropic case. 
