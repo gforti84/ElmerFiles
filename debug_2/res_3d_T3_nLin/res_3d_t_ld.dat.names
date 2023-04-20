@@ -1,0 +1,29 @@
+Metadata for SaveScalars file: res_3d_T3_nLin/res_3d_t_ld.dat
+Elmer version: 9.0
+Elmer revision: 15e7ad392
+Elmer compilation date: 2023-03-31
+Solver input file: case_3d_ld_t_3_nlf.sif
+File started at: 2023/04/07 11:42:00
+ 
+Variables in columns of matrix: 
+   1: res: fourier loss total
+   2: res: fourier loss 1
+   3: res: eddy current power
+   4: res: electromagnetic field energy
+   5: res: time
+   6: res: i_is
+   7: res: i_rc1
+   8: res: i_component(1)
+   9: res: v_is
+  10: res: v_rc1
+  11: res: v_component(1)
+  12: res: r_component(1)
+  13: res: p_dc_component(1)
+  14: res: i_r
+  15: res: i_rc2
+  16: res: i_component(2)
+  17: res: v_r
+  18: res: v_rc2
+  19: res: v_component(2)
+  20: res: r_component(2)
+  21: res: p_dc_component(2)
