@@ -1,0 +1,38 @@
+!------ Skeleton for body section -----
+Body 1
+  Name = Air
+End
+
+Body 2
+  Name = PriCoil
+End
+
+Body 3
+  Name = SecCoil
+End
+
+Body 4
+  Name = Core_R
+End
+
+Body 5
+  Name = Core_L
+End
+
+Body 6
+  Name = Core_U
+End
+
+Body 7
+  Name = Core_B
+End
+
+!------ Skeleton for boundary section -----
+Boundary Condition 1
+  Name = bnry9
+End
+
+Boundary Condition 2
+  Name = bnry10
+End
+
