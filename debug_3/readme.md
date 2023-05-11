@@ -19,19 +19,31 @@ Results are pretty close, and these are more thoroughly compared in the jupyter 
 One issue is that simulation times are very long for anisotropic cases:
 
 Input voltage and open secondary
+
 Elmer FEM:
+
 •	Isotropic – 41:40
+
 •	Anisotropic – 294:00
+
 Commercial software:
+
 •	Isotropic  – 43:35
+
 •	Anisotropic – 63:15
 
 Input voltage and resistive secondary load
+
 Elmer FEM:
+
 •	Isotropic – 46:38
+
 •	Anisotropic – 155:24
+
 Commercial software:
+
 •	Isotropic  – 31:01
+
 •	Anisotropic – 43:40
 
 
