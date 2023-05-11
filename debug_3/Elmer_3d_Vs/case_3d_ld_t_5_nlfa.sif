@@ -1,0 +1,337 @@
+! SOLVER TOTAL TIME(CPU,REAL):     15124.96    17639.46
+
+Header
+  CHECK KEYWORDS Warn
+  Mesh DB "." "mesh_anisio"
+  Include Path ""
+  Results Directory "res_3d_T5_nLin"
+End
+
+!---------------------------------------------------------
+!Parameters
+!---------------------------------------------------------
+$ freq = 60
+$ omega = 2*pi*freq
+$ mu0 = 4*pi*1e-7
+
+!! For calculations with primary current
+Include "transient_3d_lpri_extR_T.definition"
+
+!! For calculations with secondary current
+! Include "transient_3d_lsec_extR.definition"
+
+!! For calculations with complete current
+! Include "transient_3d_ld_extR_H.definition"
+
+
+
+! Usando o TEAM7_harmonics.sif como referência
+
+
+Simulation
+  Max Output Level = 5
+
+  Simulation Type = "Transient"
+  Timestepping Method = BDF
+  BDF Order = 1
+  Timestep Sizes(1) = $ 1/60/50
+  Timestep Intervals(1) = 100
+
+  Coordinate System = "Cartesian"
+  !Coordinate Mapping(3) = 1 2 3
+  !Coordinate Scaling = 1
+  
+  ! Steady State Max Iterations = 1  
+  Output Intervals(1) = 1
+  Use Mesh Names = True
+    
+  ! Post File = case_3d_t1.vtu
+End
+
+Constants
+  Permittivity of Vacuum = 8.85418781e-12
+  Permeability of Vacuum = 1.25663706e-6
+End
+
+Body 1
+  Target Bodies(1) = 1
+  Name = "Air"
+  Equation = 2
+  Material = 2
+End
+
+Body 2
+  Target Bodies(1) = 2
+  Name = "PrimaryCoil"
+  Equation = 1
+  Material = 1
+  Body Force = 1
+End
+
+
+Body 3
+  Target Bodies(1) = 3
+  Name = "SecondaryCoil"
+  Equation = 1
+  Material = 1
+End
+
+Body 4
+  Target Bodies(1) = 4
+  Name = "Core_R"
+  Equation = 2
+  Material = 3
+End
+
+Body 5
+  Target Bodies(1) = 5
+  Name = "Core_L"
+  Equation = 2
+  Material = 3
+End
+
+Body 6
+  Target Bodies(1) = 6
+  Name = "Core_U"
+  Equation = 2
+  Material = 4
+End
+
+Body 7
+  Target Bodies(1) = 7
+  Name = "Core_B"
+  Equation = 2
+  Material = 4
+End
+
+Solver 1  !---- CoilSolver, CoilSolver
+  Exec Solver = Before Timestep
+  Equation = "CoilSolver"
+  Procedure = "CoilSolver" "CoilSolver"
+  
+  Steady State Convergence Tolerance = 1e-08 
+  Linear System Solver = "Iterative"
+  Linear System Preconditioning = ILU1
+  Linear System Max Iterations = 500
+  Linear System Convergence Tolerance = 1e-8
+  Linear System Iterative Method = BiCGStab
+  Linear System Residual Output = 1
+
+  Normalize Coil Current = Logical True
+  Fix Input Current Density = Logical True
+  Nonlinear System Consistent Norm = Logical True
+  Save Coil Set = Logical True
+  Save Coil Index = Logical True
+  Coil Closed = Logical True
+  
+  Calculate Elemental Fields = Logical True
+
+  Nonlinear System Consistent Norm = Logical True
+
+  ! Narrow Interface = Logical True
+  ! Coil Normal(3) = 0.0 1.0 0.0
+
+End
+
+Solver 2  !---- CircuitsAndDynamics, CircuitsAndDynamics
+  Exec Solver = Always
+  Equation = Circuits
+  Variable = X
+  No Matrix = Logical True
+  Procedure = "CircuitsAndDynamics" "CircuitsAndDynamics"
+End
+
+
+Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
+  Exec Solver = Always
+  Equation = "MGDynamics"
+  Variable = "A"
+  Procedure = "MagnetoDynamics" "WhitneyAVSolver"
+  
+  Export Lagrange Multiplier = Logical True
+
+  Linear System Solver = Iterative
+  Linear System Iterative Method = BicgstabL ! GCR ! Idrs ! BicgstabL
+  Linear System preconditioning = ILUT
+  Linear System ILUT Tolerance = 1e-6
+  Linear System Convergence Tolerance = 1.e-9
+  Linear System Abort Not Converged = Logical False
+  Linear System Max Iterations = 30000
+  Linear System Residual Output = 100
+
+  ! Linear System ILU Order = Integer 0 !!
+  BicgstabL polynomial degree = 6
+  Idrs Parameter = Integer 6
+  Linear System GCR Restart = Integer 2000
+
+  Steady State Convergence Tolerance = 1e-08
+  
+  Newton-Raphson Iteration = Logical True
+  Nonlinear System Max Iterations = 20
+  Nonlinear System Convergence Tolerance = 1e-6
+  Nonlinear System Newton After Iterations = 5 !!
+  Nonlinear System Newton After Tolerance = 1.0e-3 !!
+  Nonlinear System Relaxation Factor = 1.0
+
+  ! Nonlinear System Consistent Norm = Logical True !!!
+  Linear System Symmetric = Logical True
+  Linear System Robust = Logical True
+
+  ! Use Elemental CoilCurrent = Logical True
+  ! Fix Input Current Density = Logical True
+
+End
+
+Solver 4  !---- MagnetoAndDynamics, MagnetoDynamicsCalcFields
+  Exec Solver = Always
+  Equation = MGDynamicsCalc
+  Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+  
+  Potential Variable = String "A"
+  Steady State Convergence Tolerance = 1.0e-8
+  
+  Linear System Solver = Iterative
+  Linear System Symmetric = True
+  Linear System Iterative Method = CG
+  Linear System Max Iterations = 5000
+  Linear System Convergence Tolerance = 1.0e-8
+  Linear System Preconditioning = ILU0
+  Linear System ILUT Tolerance = 1.0e-3
+  Linear System Abort Not Converged = False
+  Linear System Residual Output = 1
+  Linear System Precondition Recompute = 1
+  Discontinuous Bodies = Logical True
+  
+  Calculate Elemental Fields = Logical True
+  Calculate Magnetic Flux Density = Logical True
+  Calculate Current Density = Logical True
+  Calculate Magnetic Field Strength = Logical True
+End
+
+Solver 5  !---- CircuitsAndDynamics, CircuitsOutput
+  Exec Solver = After timestep
+  Equation = Circuits Output
+  Procedure = "CircuitsAndDynamics" "CircuitsOutput"
+End
+
+Solver 6
+  Exec Solver = Always
+  Equation = FourierLoss
+  Procedure = "FourierLoss" "FourierLossSolver"
+  Target Variable = String "A"
+
+  Frequency = Real $ freq
+
+  Fourier Start Time = Real 0
+  Fourier Integrate Cycles = Integer 1
+  Separate Loss Components = Logical True
+
+  Fourier Series Components = Integer 21 ! Should be >= Number of slots
+  ! -> If the folder does not exist, it breaks
+  ! Fourier Loss Filename = File "res_3d_T5_nLin/loss.dat"
+
+  Harmonic Loss Frequency Exponent 1 = Real 1.0
+
+  Harmonic Loss Field Exponent 1 = Real 2.0
+End
+
+Solver 7
+   Exec Solver = After timestep
+   Procedure = "SaveData" "SaveScalars"
+   Filename = res_3d_t_ld.dat
+End
+
+
+Equation 1
+  Name = "MgDynCoil"
+  Active Solvers(6) = 1 2 3 4 5 6
+End
+
+Equation 2
+  Name = "MgDynNonCoil"
+  Active Solvers(3) = 3 4 6
+End
+
+Material 1
+  Name = "Copper"
+  Electric Conductivity = Real 58e6
+  Relative Permeability = Real 1.0
+  Relative Permittivity = Real 1.0
+End
+
+Material 2
+  Name = "Air"
+  Electric Conductivity = Real 0.0
+  Relative Permeability = Real 1.0
+  Relative Permittivity = Real 1.0
+End
+
+Material 3
+  Name = "SiFe_Y"
+  Electric Conductivity = Real 0.0
+
+  Reluctivity Function(3,3) = variable B1_dummy, B2_dummy, B3_dummy
+    real procedure "reluctivity_aniso_y" "reluctayfun"
+
+  my X h-b curve = Variable "BabsX_dummy"
+    Real Cubic Monotone
+     include BH_DT_3_data.dat
+    End 
+
+  my Y h-b curve = Variable "BabsY_dummy"
+    Real Cubic Monotone
+     include BH_DL_3_data.dat
+    End 
+
+  Relative Permittivity = Real 1.0
+
+  ! C1 Hysteresis k_h
+  Harmonic Loss Coefficient 1 = Real 30.6
+  ! C2 Eddy currents k_e
+  ! Harmonic Loss Coefficient 2 = Real 0
+  ! ! C3 Excessive k_a
+  ! Harmonic Loss Coefficient 3 = Real 0
+
+End
+
+Material 4
+  Name = "SiFe_X"
+  Electric Conductivity = Real 0.0
+
+  Reluctivity Function(3,3) = variable B1_dummy, B2_dummy, B3_dummy
+    real procedure "reluctivity_aniso_x" "reluctaxfun"
+
+  my X h-b curve = Variable "BabsX_dummy"
+    Real Cubic Monotone
+     include BH_DL_3_data.dat
+    End 
+
+  my Y h-b curve = Variable "BabsY_dummy"
+    Real Cubic Monotone
+     include BH_DT_3_data.dat
+    End 
+
+  Relative Permittivity = Real 1.0
+
+  ! C1 Hysteresis k_h
+  Harmonic Loss Coefficient 1 = Real 30.6
+  ! C2 Eddy currents k_e
+  ! Harmonic Loss Coefficient 2 = Real 0
+  ! ! C3 Excessive k_a
+  ! Harmonic Loss Coefficient 3 = Real 0
+
+End
+
+Initial Condition 1
+  A {e} = Real 0
+  W = Real 1.0
+End
+
+
+Boundary Condition 1
+  Target Boundaries(1) = 1
+  Name = "Outer"
+  A {e} = Real 0
+  
+  Jfix = Real 0.0
+End

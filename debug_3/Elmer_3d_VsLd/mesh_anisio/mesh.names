@@ -1,0 +1,11 @@
+! ----- names for bodies -----
+$ Air = 1
+$ PriCoil = 2
+$ SecCoil = 3
+$ Core_R = 4
+$ Core_L = 5
+$ Core_U = 6
+$ Core_B = 7
+! ----- names for boundaries -----
+$ bnry9 = 1
+$ bnry10 = 2

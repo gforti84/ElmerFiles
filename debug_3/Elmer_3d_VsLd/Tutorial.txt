@@ -1,0 +1,2 @@
+ElmerGrid 2 2 ./mesh_anisio/ -partdual -metiskway 4
+mpirun -np 4 ElmerSolver_mpi case_3d_ld_t_2_nl.sif
