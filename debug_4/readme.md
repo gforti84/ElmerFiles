@@ -47,8 +47,8 @@ Folder EF_Aniso_Nlin
   res_qd_iter_v1 -> SOLVER TOTAL TIME(CPU,REAL):      1748.44     1504.15  
 
 
-  Issues:
-  Can not run vanka with mpi
-  Solver times changes significantly with anisotropic permeability (please refer to linear case)
+  Issues:  
+    Can not run vanka with mpi  
+    Solver times changes significantly with anisotropic permeability (please refer to linear case)  
 
 
