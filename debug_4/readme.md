@@ -36,12 +36,12 @@ Folder EF_Iso_Nlin
   case_3d_lin_IsoNlin_M_v2.sif / res_lin_dir_v1 -> Didn't converge  
   
 Folder EF_Aniso_Lin  (permeability of z-axis was changed from 1xmu0 to 1000xmu0)
-  case_3d_lin_IsoNlin.sif / res_iter_1mu0 -> SOLVER TOTAL TIME(CPU,REAL):      1974.53     1677.86  
-  case_3d_lin_IsoNlin.sif / res_iter_10mu0 -> SOLVER TOTAL TIME(CPU,REAL):       313.31      272.75  
-  case_3d_lin_IsoNlin.sif / res_iter_100mu0 -> SOLVER TOTAL TIME(CPU,REAL):       138.16      134.73  
-  case_3d_lin_IsoNlin_2.sif / res_iter_100mu0_2 -> SOLVER TOTAL TIME(CPU,REAL):        74.39       74.92 ! Didn't converge in other conditions  
-  case_3d_lin_IsoNlin.sif / res_iter_1000mu0 -> SOLVER TOTAL TIME(CPU,REAL):        68.91       68.44  
-  case_3d_qd_AnisoLin.sif / res_lin_dir_v1 -> SOLVER TOTAL TIME(CPU,REAL):        10.75       11.81  
+  case_3d_qd_AnisoLin.sif / res_iter_1mu0 -> SOLVER TOTAL TIME(CPU,REAL):      1974.53     1677.86  
+  case_3d_qd_AnisoLin.sif / res_iter_10mu0 -> SOLVER TOTAL TIME(CPU,REAL):       313.31      272.75  
+  case_3d_qd_AnisoLin.sif / res_iter_100mu0 -> SOLVER TOTAL TIME(CPU,REAL):       138.16      134.73  
+  case_3d_qd_AnisoLin_2.sif / res_iter_100mu0_2 -> SOLVER TOTAL TIME(CPU,REAL):        74.39       74.92 ! Didn't converge in other conditions  
+  case_3d_qd_AnisoLin.sif / res_iter_1000mu0 -> SOLVER TOTAL TIME(CPU,REAL):        68.91       68.44  
+  case_3d_lin_AnisoLin_M.sif / res_lin_dir_v1 -> SOLVER TOTAL TIME(CPU,REAL):        10.75       11.81 (1xmu0) 
   
 Folder EF_Aniso_Nlin  
   case_3d_lin_AnisoNlin.sif / res_lin_iter_v1 -> SOLVER TOTAL TIME(CPU,REAL):       463.21      348.69  
