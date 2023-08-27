@@ -1,0 +1,9 @@
+Metadata for SaveScalars file: res_lin_v1/res_3d_h.dat
+Elmer version: 9.0
+Elmer compilation date: 2023-08-23
+Solver input file: case_3d_lin.sif
+File started at: 2023/08/24 14:49:21
+ 
+Variables in columns of matrix: 
+   1: res: eddy current power
+   2: res: electromagnetic field energy

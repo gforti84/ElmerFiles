@@ -1,0 +1,20 @@
+Metadata for SaveLine file: res_lin_v1_M/bh_line_leg.dat
+Elmer version: 9.0
+Elmer compilation date: 2023-08-23
+Solver input file: case_3d_lin.sif
+File started at: 2023/08/24 14:47:54
+Number of data nodes for each step
+  bc nodes: 0
+  polyline nodes: 762
+  circle nodes: 0
+  isocurve nodes: 0
+Data on different columns
+  1: Call count
+  2: Boundary condition
+  3: Node index
+  4: coordinate 1
+  5: coordinate 2
+  6: coordinate 3
+  7: magnetic flux density e 1
+  8: magnetic flux density e 2
+  9: magnetic flux density e 3

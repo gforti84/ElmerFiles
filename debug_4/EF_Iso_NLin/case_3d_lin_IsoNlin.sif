@@ -1,0 +1,339 @@
+Include ../mesh_elem1st/mesh.names
+! Include mesh_elem2nd/mesh.names
+
+Header
+  CHECK KEYWORDS Warn
+  Mesh DB ".." "mesh_elem1st"
+  Include Path ""
+  ! Results Directory "res_iter"
+  Results Directory "res_lin_iter_v1"
+End
+
+!---------------------------------------------------------
+!Parameters
+!---------------------------------------------------------
+$ freq = 0
+$ omega = 2*pi*freq
+$ mu0 = 4*pi*1e-7
+
+$ DL_perm = 10000*mu0
+$ DT_perm = 5000*mu0
+$ DZ_perm = 100*mu0
+
+Simulation
+  Max Output Level = 7
+  Coordinate System = Cartesian
+  Coordinate Mapping(3) = 1 2 3
+  Coordinate Scaling = 1
+  
+  Simulation Type = Steady state
+  ! Angular Frequency = $ omega
+  Output Intervals(1) = 1
+  Steady State Max Iterations = 1
+  Use Mesh Names = True
+    
+  ! Post File = case_3d_qd.vtu
+End
+
+Constants
+  Permittivity of Vacuum = 8.85418781e-12
+  Permeability of Vacuum = 1.25663706e-6
+End
+
+Body 1
+  Target Bodies(1) = $ PriCoil
+  Name = "PrimaryCoil"
+  Equation = 1
+  Material = 1
+  Body Force = 1
+End
+
+Component 1 
+  Name = String "Coil1"
+  Coil Type = String "stranded"
+  Master Bodies(1) = Integer 1
+  Desired Current Density = Real 0.1e5  
+  Coil Normal(3) = Real 0. 1. 0.
+End 
+
+Body Force 1
+  Current Density 1 = Equals "CoilCurrent e 1"
+  Current Density 2 = Equals "CoilCurrent e 2"
+  Current Density 3 = Equals "CoilCurrent e 3"
+End
+
+Body 2
+  Target Bodies(1) = $ SecCoil
+  Name = "SecondaryCoil"
+  Equation = 1
+  Material = 1
+  Body Force = 2
+End
+
+Component 2
+  Name = String "Coil2"
+  Coil Type = String "stranded"
+  Master Bodies(1) = Integer 2
+  Desired Current Density = Real 0 
+  Coil Normal(3) = Real 0. 1. 0.
+End 
+
+Body Force 2
+  Current Density 1 = Equals "CoilCurrent e 1"
+  Current Density 2 = Equals "CoilCurrent e 2"
+  Current Density 3 = Equals "CoilCurrent e 3"
+End
+
+Body 3
+  Target Bodies(1) = $ Core_L
+  Name = "Core_L"
+  Equation = 2
+  Material = 3
+End
+
+Body 4
+  Target Bodies(1) = $ Core_R
+  Name = "Core_R"
+  Equation = 2
+  Material = 3
+End
+
+Body 5
+  Target Bodies(1) = $ Core_U
+  Name = "Core_U"
+  Equation = 2
+  Material = 3
+End
+
+Body 6
+  Target Bodies(1) = $ Core_B
+  Name = "Core_B"
+  Equation = 2
+  Material = 3
+End
+
+Body 7
+  Target Bodies(1) = $ Air
+  Name = "Air"
+  Equation = 2
+  Material = 2
+End
+
+Solver 1  !---- CoilSolver, CoilSolver
+  Exec Solver = Before All
+  Equation = "CoilSolver"
+  Procedure = "CoilSolver" "CoilSolver"
+
+  Linear System Solver = "Iterative"
+  Linear System Preconditioning = ILU1
+  Linear System Max Iterations = 1000
+  Linear System Convergence Tolerance = 1e-10
+  Linear System Iterative Method = BiCGStab ! GCR ! BiCGStab
+  Linear System Residual Output = 10
+  Steady State Convergence Tolerance = 1e-06
+
+  Coil Closed = Logical True
+
+  Normalize Coil Current = Logical True
+  Nonlinear System Consistent Norm = Logical True
+  Narrow Interface = Logical True
+  Save Coil Set = Logical True
+  Save Coil Index = Logical True
+  Calculate Elemental Fields = Logical True
+
+  ! Ensure divergence-freeness of source
+  ! Must be False to equal results from case.sif with Jfix
+  Fix Input Current Density = Logical False
+
+End
+
+Solver 2  !---- MagnetoDynamics, WhitneyAVSolver
+  !Exec Solver = Never
+  Equation = "MGDynamics"
+  Variable = "A"
+  Procedure = "MagnetoDynamics" "WhitneyAVSolver"
+
+  Steady State Convergence Tolerance = 1e-8
+  
+  Export Lagrange Multiplier = Logical True
+  
+  Linear System Solver = Iterative
+  Linear System Iterative Method = BicgstabL
+  BicgStabL Polynomial Degree = 6
+  Linear System Convergence Tolerance = 1e-8
+  Linear System Max Iterations = 10000
+  Linear System Residual Output = 10
+
+  ! Linear System GCR Restart = 200
+  ! Idrs Parameter = Integer 6
+
+  Linear System Preconditioning = none ! ILUT
+  Linear System ILUT Tolerance = 1e-3
+    
+  Linear System Abort Not Converged = False
+  
+  !-
+  !Newton-Raphson Iteration = Logical True
+  !Nonlinear System Max Iterations = 20
+  !Nonlinear System Convergence Tolerance = 1e-3
+  !Nonlinear System Relaxation Factor = 0.7
+  
+  !Linear System Symmetric = Logical True
+  !-
+  Nonlinear System Convergence Tolerance = 1.0e-5
+  Nonlinear System Max Iterations = 200
+  Nonlinear System Newton After Iterations = 5
+  Nonlinear System Newton After Tolerance = 1.0e-3
+  Nonlinear System Relaxation Factor = 1
+  Nonlinear System Consistent Norm = Logical True
+
+  Newton-Raphson Iteration = Logical True
+  Linear System Robust = Logical True
+  Fix Input Current Density = Logical True
+
+  ! Quadratic Approximation = Logical True
+  ! Use Piola Transform = Logical True
+   
+End
+
+Solver 3  !---- MagnetoAndDynamics, MagnetoDynamicsCalcFields
+  ! Exec Solver = Always
+  Equation = MGDynamicsCalc
+  Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+
+  Nonlinear System Relaxation Factor = 1
+  
+  Potential Variable = String "A"
+  Steady State Convergence Tolerance = 1.0e-8
+  
+  Linear System Solver = Iterative
+  Linear System Symmetric = True
+  Linear System Iterative Method = CG
+  Linear System Max Iterations = 5000
+  Linear System Convergence Tolerance = 1.0e-8
+  Linear System Preconditioning = ILU0
+  Linear System ILUT Tolerance = 1.0e-3
+  Linear System Abort Not Converged = False
+  Linear System Residual Output = 1
+  Linear System Precondition Recompute = 1
+
+  Calculate Nodal Fields = Logical True
+  Calculate Elemental Fields = Logical True
+  
+  Calculate Current Density = Logical True
+  Calculate Magnetic Field Strength = True
+  Calculate Magnetic Vector Potential = Logical True
+  
+End
+
+Solver 4
+   Exec Solver = After Timestep
+   Procedure = "SaveData" "SaveScalars"
+   Filename = res_3d_h.dat
+End
+
+Solver 5
+  Exec Solver = Never
+  ! Exec Solver = After Saving
+  Equation = "ResultOutput"
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  Output File Name = case_res_qd_2
+  Vtu format = Logical True
+  Binary Output = Logical True
+  Discontinuous Bodies = Logical True
+
+  Save Elemental Fields = Logical True
+  Save Geometry Ids = True
+  Save Bulk Only = True
+End
+
+Solver 6
+  Exec Solver = After Saving
+  Equation = SaveLine_1
+  Procedure = "SaveData" "SaveLine"
+  Filename = BH_line_joint.dat
+  Variable 1 = Magnetic Flux Density E
+  Polyline Coordinates(2,3) = 0.01 0.0225 0 0.025 0.0375 0
+  Polyline Divisions(1) = 1001 ! 500
+End
+
+Solver 7
+  Exec Solver = After Saving
+  Equation = SaveLine_2
+  Procedure = "SaveData" "SaveLine"
+  Filename = BH_line_leg.dat
+  Variable 1 = Magnetic Flux Density E
+  Polyline Coordinates(2,3) = 0.01 0 0 0.025 0 0
+  Polyline Divisions(1) = 501 ! 500
+End
+
+Solver 8
+  Exec Solver = After Saving
+  Equation = SaveLine_3
+  Procedure = "SaveData" "SaveLine"
+  Filename = BH_line_joint_xyz.dat
+  Variable 1 = Magnetic Flux Density E
+  Polyline Coordinates(2,3) = 0.01 0.0225 -0.0075 0.025 0.0375 0.0075
+  Polyline Divisions(1) = 1001
+End
+
+
+Equation 1
+  Name = "MgDynCoil"
+  Active Solvers(3) = 1 2 3
+End
+
+Equation 2
+  Name = "MgDynNonCoil"
+  Active Solvers(2) = 2 3
+End
+
+Material 1
+  Name = "Copper"
+  Electric Conductivity = Real 58e6
+  Relative Permeability = Real 1.0
+  Relative Permittivity = Real 1.0
+End
+
+Material 2
+  Name = "Air"
+  Electric Conductivity = Real 0.0
+  Relative Permeability = Real 1.0
+  Relative Permittivity = Real 1.0
+End
+
+Material 3
+  Name = "SiFe"
+  Electric Conductivity = Real 0.0
+
+  H-B Curve = Variable "dummy"
+  Real Cubic Monotone
+    INCLUDE BH_DL_3_data.dat
+  End
+
+
+!  Relative Permeability = Real 10000
+
+!   Reluctivity (3,3) = $ \
+!                     (1/DT_perm) 0 0 \
+!                     0 (1/DL_perm) 0 \
+!                     0 0 (1/DZ_perm)
+
+  Relative Permittivity = Real 1.0
+End
+
+Initial Condition 1
+  A {e} = Real 0
+  W = Real 1.0
+End
+
+
+Boundary Condition 1
+  Name = "Outer"
+  Target Boundaries(1) = $ Boundary
+
+  A {e} = Real 0
+  A = Real 0
+  
+  Jfix = Real 0.0
+End
