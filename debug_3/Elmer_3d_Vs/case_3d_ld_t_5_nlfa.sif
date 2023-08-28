@@ -113,9 +113,9 @@ Solver 1  !---- CoilSolver, CoilSolver
   Linear System Solver = "Iterative"
   Linear System Preconditioning = ILU1
   Linear System Max Iterations = 500
-  Linear System Convergence Tolerance = 1e-8
+  Linear System Convergence Tolerance = 1e-10
   Linear System Iterative Method = BiCGStab
-  Linear System Residual Output = 1
+  Linear System Residual Output = 10
 
   Normalize Coil Current = Logical True
   Fix Input Current Density = Logical True
@@ -152,14 +152,15 @@ Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
 
   Linear System Solver = Iterative
   Linear System Iterative Method = BicgstabL ! GCR ! Idrs ! BicgstabL
-  Linear System preconditioning = ILUT
+  Linear System preconditioning = ILU2 
   Linear System ILUT Tolerance = 1e-6
-  Linear System Convergence Tolerance = 1.e-9
+  Linear System Convergence Tolerance = 1.e-8
   Linear System Abort Not Converged = Logical False
   Linear System Max Iterations = 30000
   Linear System Residual Output = 100
 
-  ! Linear System ILU Order = Integer 0 !!
+  Edge Basis = True
+!  Linear System ILU Order = 2
   BicgstabL polynomial degree = 6
   Idrs Parameter = Integer 6
   Linear System GCR Restart = Integer 2000
@@ -168,13 +169,13 @@ Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
   
   Newton-Raphson Iteration = Logical True
   Nonlinear System Max Iterations = 20
-  Nonlinear System Convergence Tolerance = 1e-6
+  Nonlinear System Convergence Tolerance = 1e-5
   Nonlinear System Newton After Iterations = 5 !!
   Nonlinear System Newton After Tolerance = 1.0e-3 !!
-  Nonlinear System Relaxation Factor = 1.0
+  Nonlinear System Relaxation Factor = $2.0/3.0
 
   ! Nonlinear System Consistent Norm = Logical True !!!
-  Linear System Symmetric = Logical True
+  !Linear System Symmetric = Logical True
   Linear System Robust = Logical True
 
   ! Use Elemental CoilCurrent = Logical True
