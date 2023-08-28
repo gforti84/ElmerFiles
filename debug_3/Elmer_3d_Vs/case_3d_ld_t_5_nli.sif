@@ -113,9 +113,9 @@ Solver 1  !---- CoilSolver, CoilSolver
   Linear System Solver = "Iterative"
   Linear System Preconditioning = ILU1
   Linear System Max Iterations = 500
-  Linear System Convergence Tolerance = 1e-8
+  Linear System Convergence Tolerance = 1e-10
   Linear System Iterative Method = BiCGStab
-  Linear System Residual Output = 1
+  Linear System Residual Output = 10
 
   Normalize Coil Current = Logical True
   Fix Input Current Density = Logical True
@@ -152,9 +152,10 @@ Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
 
   Linear System Solver = Iterative
   Linear System Iterative Method = BicgstabL ! GCR ! Idrs ! BicgstabL
-  Linear System preconditioning = ILUT
+  Linear System preconditioning = ILU2
+  Edge Basis = True
   Linear System ILUT Tolerance = 1e-6
-  Linear System Convergence Tolerance = 1.e-8
+  Linear System Convergence Tolerance = 1.e-7
   Linear System Abort Not Converged = Logical False
   Linear System Max Iterations = 30000
   Linear System Residual Output = 100
@@ -168,10 +169,10 @@ Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
   
   Newton-Raphson Iteration = Logical True
   Nonlinear System Max Iterations = 20
-  Nonlinear System Convergence Tolerance = 1e-6
+  Nonlinear System Convergence Tolerance = 1e-5
   Nonlinear System Newton After Iterations = 5 !!
   Nonlinear System Newton After Tolerance = 1.0e-3 !!
-  Nonlinear System Relaxation Factor = 1.0
+  Nonlinear System Relaxation Factor = $2.0/3.0
 
   ! Nonlinear System Consistent Norm = Logical True !!!
   Linear System Symmetric = Logical True
@@ -179,7 +180,6 @@ Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
 
   ! Use Elemental CoilCurrent = Logical True
   ! Fix Input Current Density = Logical True
-
 End
 
 Solver 4  !---- MagnetoAndDynamics, MagnetoDynamicsCalcFields
@@ -236,6 +236,7 @@ Solver 6
 End
 
 Solver 7
+   Equation = "SaveScalars"
    Exec Solver = After timestep
    Procedure = "SaveData" "SaveScalars"
    Filename = res_3d_t_ld.dat
