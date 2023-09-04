@@ -237,6 +237,7 @@ Solver 6
 End
 
 Solver 7
+   Equation = "SaveScalars"
    Exec Solver = After timestep
    Procedure = "SaveData" "SaveScalars"
    Filename = res_3d_t_ld.dat
