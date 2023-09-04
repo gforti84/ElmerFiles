@@ -3,17 +3,17 @@
 From the last test, I did a few adjustments to the sif file based on the tips given by Peter.  
 Also, the reluctivity funcitions were modified, z-axis relalive permeability is not 1, but 100 and saturates at 1.5 T. 
 
-  IF(BabsZ > 1.5) THEN
-    nuZ = 1 / mu0
-  ELSE
-    nuZ = 1 / (100*mu0)
-  END IF
+  IF(BabsZ > 1.5) THEN  
+    nuZ = 1 / mu0  
+  ELSE  
+    nuZ = 1 / (100*mu0)  
+  END IF  
 
-This value does not create a flux in the z-axis (it is evaluated here), but the simulation time is significantly changed, as shown below:
-DZ = 1 - 982.23s (5 NL iter )
+This value does not create a flux in the z-axis (it is evaluated here), but the simulation time is significantly changed, as shown below:  
+DZ = 1 - 982.23s (5 NL iter )  
 DZ = 50 - 576.90s (5 NL iter)  
-DZ = 100 - 385.55s (5 NL iter)
-DZ = 1000 - 215.00s (5 NL iter)
+DZ = 100 - 385.55s (5 NL iter)  
+DZ = 1000 - 215.00s (5 NL iter)  
 
 This is another anisotropic test. The geometry is arbitrary and did not follow any project or reference.
 Simulation for different material properties for steady state condition only, considering isotropic and anisotropic for both linear and non-linear bh curves.
