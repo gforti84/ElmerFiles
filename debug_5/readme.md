@@ -34,7 +34,7 @@ The simulating times for commercial software (using the final mesh, so it is onl
 Running Elmer on Mint 21.2 with mpirun -np 4. Each folder has a jupyter notebook for comparing the results (res_AM are the commercial software results). Following are the case files and result folders for different tests.  
   
 Folder EF_Aniso_Nlin  
-  case_3d_qd_AnisoNlin_pr.sif / res_qd_iter_v1 -> SOLVER TOTAL TIME(CPU,REAL):       588.76      502.89
+  case_3d_qd_AnisoNlin_pr.sif / res_qd_iter_v1 -> SOLVER TOTAL TIME(CPU,REAL):       534.28      455.87
 
 Results comparison:
 

@@ -1,8 +1,8 @@
 Metadata for SaveLine file: bh_line_joint.dat
 Elmer version: 9.0
-Elmer compilation date: 2023-09-01
+Elmer compilation date: 2023-09-02
 Solver input file: case_3d_qd_anisonlin_pr.sif
-File started at: 2023/09/03 22:09:18
+File started at: 2023/09/04 15:10:39
 Number of data nodes for each step
   bc nodes: 0
   polyline nodes: 0
