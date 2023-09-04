@@ -26,7 +26,7 @@ The mesh for the tests tried to replicate the optimized mesh from the commercial
 
 ![image](Figures/mesh_am_2.png)  
 
-![image](Figures/Mesh_ef_1.png)  
+![image](Figures/mesh_ef_1.png)  
   
 The simulating times for commercial software (using the final mesh, so it is only the solver time):  
 - Anisotropic non-linear - 380s
