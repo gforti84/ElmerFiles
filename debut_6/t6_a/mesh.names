@@ -1,0 +1,13 @@
+! ----- names for bodies -----
+$ core_dl_y = 1
+$ core_dl_x = 2
+$ none = 3
+! ----- names for boundaries -----
+$ BC1 = 1
+$ BC2 = 2
+$ BC3 = 3
+$ BC4 = 4
+$ BC5 = 5
+$ BC6 = 6
+$ BC7 = 7
+$ BC8 = 8

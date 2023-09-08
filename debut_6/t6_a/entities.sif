@@ -1,0 +1,46 @@
+!------ Skeleton for body section -----
+Body 1
+  Name = core_dl_y
+End
+
+Body 2
+  Name = core_dl_x
+End
+
+Body 3
+  Name = none
+End
+
+!------ Skeleton for boundary section -----
+Boundary Condition 1
+  Name = BC1
+End
+
+Boundary Condition 2
+  Name = BC2
+End
+
+Boundary Condition 3
+  Name = BC3
+End
+
+Boundary Condition 4
+  Name = BC4
+End
+
+Boundary Condition 5
+  Name = BC5
+End
+
+Boundary Condition 6
+  Name = BC6
+End
+
+Boundary Condition 7
+  Name = BC7
+End
+
+Boundary Condition 8
+  Name = BC8
+End
+
