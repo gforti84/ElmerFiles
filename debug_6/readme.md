@@ -4,7 +4,7 @@ This folder has different test cases for a simplest case of magnetic flux distri
   
 The core is defined only at one joint, leg and yoke. Magnetic flux is driven by a boundary condition. There is a dummy surface, or volume, but it is there only for numerical purpose. The relative permeability is low enough to avoid magnetic flux.  
 
-![image|100x](Figures/mesh_bodies.png)  
+![image|20x](Figures/mesh_bodies.png)  
   
 The meshes are created using gmsh python and there are some refinement parameters:   
   
