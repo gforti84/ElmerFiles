@@ -47,7 +47,7 @@ the results diverges significantly.
 ![image](Figures/case_3d_aniso_urz1.png)   
 ![image](Figures/case_3d_aniso_urz1_lines.png)  
 
-Also, 3D non-linear cases did not converge, either isotropic or anisotrpic.
+Also, for 3D non-linear cases, the non-linear solver did not converge, either isotropic or anisotrpic.
 
 
 
