@@ -33,14 +33,14 @@ The cases were compared with FEMM simulation.
 ![image](Figures/case_3d.png)   
 ![image](Figures/case_3d_lines.png)  
    
-3D anisotropic linear:  
+3D anisotropic linear (z-axis mu_r=10000):  
 ![image](Figures/case_3d_aniso.png)   
 ![image](Figures/case_3d_aniso_lines.png)  
 
 Now the problems. For 3D anisotropic linear, if the z-axis permeability is defined with lower values, 
 the results diverges significantly.  
   
-3D anisotropic linear (mu_r=1):  
+3D anisotropic linear (z-axis mu_r=1):  
 ![image](Figures/case_3d_aniso_urz1.png)   
 ![image](Figures/case_3d_aniso_urz1_lines.png)  
 
