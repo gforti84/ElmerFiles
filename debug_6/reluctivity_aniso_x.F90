@@ -51,13 +51,13 @@ SUBROUTINE reluctaxfun(Model, n, X, Y)
       
       nuX = MIN( HabsX / BabsX, 1 / mu0 ) 
       nuY = MIN( HabsY / BabsY, 1 / mu0 )
-      ! nuZ = 1 / mu0
+      nuZ = 10000 / mu0
 
-      IF(BabsZ > 1.5) THEN
-        nuZ = 1 / mu0
-      ELSE
-        nuZ = 1 / (1*mu0)
-      END IF
+      ! IF(BabsZ > 1.5) THEN
+      !   nuZ = 1 / mu0
+      ! ELSE
+      !   nuZ = 1 / (100*mu0)
+      ! END IF
 
       ! IF(BabsZ > 0.01) THEN
       !   PRINT *,' ===== BabsZ is leaking ===== : ', BabsZ

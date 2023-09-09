@@ -2,16 +2,24 @@ import gmsh
 import sys
 import os
 
+# === Input Parameters ===
+# -> Mesh Control <-
+
+mesh_all = 15         # Overall mesh size
+mesh_core = 15/2         # Overall mesh core size
+mesh_inner_surf = 15/4   # Mesh size for inner surface (adjacent to 'none' region)
+mesh_joint = 15/4        # Mesh size for joint surface (between leg and yoke)
+
+
 gmsh.initialize()
 
 gmsh.option.setNumber('Geometry.OCCBooleanPreserveNumbering',True)
 
-gmsh.model.add('t6')
+gmsh.model.add('t6_a')
 
 # Testar depois usando o OpenCASCADE
 # creating the cubes:
 
-# lc = 1
 
 mps = 0 # mesh point size
 
@@ -134,13 +142,14 @@ gmsh.model.addPhysicalGroup(2,[206],6,'BC6')
 
 gmsh.model.addPhysicalGroup(2,[101, 111],7,'BC7')
 gmsh.model.addPhysicalGroup(2,[102, 112],8,'BC8')
+gmsh.model.addPhysicalGroup(2,[103, 113],9,'BC9')
 
 
 gmsh.model.occ.synchronize()
 
-lc = 15
+# lc = 15
 
-gmsh.model.mesh.setSize(gmsh.model.getEntities(0),lc)
+gmsh.model.mesh.setSize(gmsh.model.getEntities(0),mesh_all)
 
 core_list = []
 core_list.append(gmsh.model.getEntitiesForPhysicalGroup(3,1)[0])
@@ -148,17 +157,17 @@ core_list.append(gmsh.model.getEntitiesForPhysicalGroup(3,2)[0])
 
 gmsh.model.mesh.field.add('Constant',1)
 gmsh.model.mesh.field.setNumbers(1,'VolumesList',core_list)
-gmsh.model.mesh.field.setNumber(1, "VIn", lc/2)
+gmsh.model.mesh.field.setNumber(1, "VIn", mesh_core)
 
 # print(gmsh.model.getEntitiesForPhysicalGroup(3,1))
 
 gmsh.model.mesh.field.add('Constant',2)
 gmsh.model.mesh.field.setNumbers(2,'SurfacesList',[202, 203])
-gmsh.model.mesh.field.setNumber(2, "VIn", lc/2)
+gmsh.model.mesh.field.setNumber(2, "VIn", mesh_inner_surf)
 
 gmsh.model.mesh.field.add('Constant',3)
 gmsh.model.mesh.field.setNumbers(3,'SurfacesList',[209])
-gmsh.model.mesh.field.setNumber(3, "VIn", lc/2)
+gmsh.model.mesh.field.setNumber(3, "VIn", mesh_joint)
 
 gmsh.model.mesh.field.add("Min", 4)
 gmsh.model.mesh.field.setNumbers(4, "FieldsList", [1, 2, 3])
@@ -167,16 +176,24 @@ gmsh.model.mesh.field.setAsBackgroundMesh(4)
 
 gmsh.model.mesh.generate(3)
 
-# gmsh.write('t6.geo_unrolled')
+gmsh.write('t6_a.geo_unrolled')
 
 # # # # # # # Usando o formato *.msh melhora ao reter as definições dos Physical Groups. Os nomes ficam no 
 # # # # # # #   arquivo entities.sif. 
 gmsh.write('t6_a.msh')
 
+# os.system('gmsh t6_a.geo_unrolled')
 # os.system('gmsh t6_a.msh')
 
 os.system('ElmerGrid 14 2 t6_a.msh -autoclean')
+os.system('ElmerGrid 2 2 ./t6_a -autoclean -partdual -metiskway 4')
+
+# os.system('ElmerSolver case_ef_3d.sif')
 os.system('ElmerSolver case_ef_3d_aniso.sif')
+# os.system('ElmerSolver case_ef_3d_NL.sif')
+# os.system('ElmerSolver case_ef_3d_anNL.sif')
+
+# os.system('mpirun -np 4 ElmerSolver_mpi case_ef_3d.sif ')
 
 # os.system('ElmerGUI')
 
