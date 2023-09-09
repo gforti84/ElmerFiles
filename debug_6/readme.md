@@ -41,7 +41,7 @@ Now the problems. For 3D anisotropic linear, if the z-axis permeability is defin
 the results diverges significantly.  
   
 3D anisotropic linear ($\mu_r=1$):  
-![image](Figures/case_3d_aniso_urz1.png)   
+![image](Figures/case_3d_aniso.png)   
 ![image](Figures/case_3d_aniso_urz1_lines.png)  
 
 Also, 3D non-linear cases did not converge, either isotropic or anisotrpic.
