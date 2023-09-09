@@ -25,7 +25,7 @@ The cases were compared with FEMM simulation.
 ![image](Figures/case_2d.png)   
 ![image](Figures/femm.png)   
   
-2D base anisotropic linear:  
+2D anisotropic linear:  
 ![image](Figures/case_2d_aniso.png)   
 ![image](Figures/femm_aniso.png)   
   
@@ -33,9 +33,18 @@ The cases were compared with FEMM simulation.
 ![image](Figures/case_3d.png)   
 ![image](Figures/case_3d_lines.png)  
    
-3D base anisotropic:  
+3D anisotropic linear:  
 ![image](Figures/case_3d_aniso.png)   
-![image](Figures/case_3d_aniso_lines.png)   
+![image](Figures/case_3d_aniso_lines.png)  
+
+Now the problems. For 3D anisotropic linear, if the z-axis permeability is defined with lower values, 
+the results diverges significantly.  
+  
+3D anisotropic linear ($\mu_r=1$):  
+![image](Figures/case_3d_aniso_ur_z_1.png)   
+![image](Figures/case_3d_aniso_ur_z_1_lines.png)  
+
+Also, 3D non-linear cases did not converge, either isotropic or anisotrpic.
 
 
 
