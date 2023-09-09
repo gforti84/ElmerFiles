@@ -31,6 +31,7 @@ The cases were compared with FEMM simulation.
   
 2D isotropic non-linear:  
 ![image](Figures/case_2d_nl.png)   
+![image](Figures/femm_nl.png)   
   
 3D base:  
 ![image](Figures/case_3d.png)   
