@@ -18,11 +18,26 @@ mesh_joint = 15/4        # Mesh size for joint surface (between leg and yoke)
   
 ![image](Figures/mesh_inner.png)  
 ![image](Figures/mesh_joint.png)  
-
+  
 The cases were compared with FEMM simulation.
-
+  
 2D base:  
-![image](Figures/case_2d.png) ![image](Figures/femm.png)    
+![image](Figures/case_2d.png)   
+![image](Figures/femm.png)   
+  
+2D base anisotropic linear:  
+![image](Figures/case_2d_aniso.png)   
+![image](Figures/femm_aniso.png)   
+  
+3D base:  
+![image](Figures/case_3d.png)   
+![image](Figures/femm_3d_lines.png)  
+   
+3D base anisotropic:  
+![image](Figures/case_3d_aniso.png)   
+![image](Figures/femm_3d_aniso_lines.png)   
+
+
 
   
   
