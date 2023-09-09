@@ -31,11 +31,11 @@ The cases were compared with FEMM simulation.
   
 3D base:  
 ![image](Figures/case_3d.png)   
-![image](Figures/femm_3d_lines.png)  
+![image](Figures/case_3d_lines.png)  
    
 3D base anisotropic:  
 ![image](Figures/case_3d_aniso.png)   
-![image](Figures/femm_3d_aniso_lines.png)   
+![image](Figures/case_3d_aniso_lines.png)   
 
 
 
