@@ -23,6 +23,7 @@ Now, just convert using ***‘ElmerGrid 11 2 your-file -autoclean’***, which r
 For comparison with FEMM:  
 <img src="Figures/femm_mesh.png" width="540">  
 
+One thing about this procedure is that the bodies must be identified manually for the definition of Elmer problem without GUI. 
 
 The boundary for mortar BC is created and ca be used to define the problem within Elmer. Only issue that was found is that the boundary definition need the keyword **‘Discontinuous Target Bodies = Integer’** so the problem can run:
 ```
