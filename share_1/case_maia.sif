@@ -1,0 +1,312 @@
+! PMSM 2D transient simulation 
+! Parameters (derived from Pavel's tutorial)
+$ w_m = 3600/60*2*pi ! [rad/s mech.] mechanical frequency 
+$ pp = 1 ! number of polepairs 
+$ w_el = w_m*pp ! [rad/s el.] electrical frequency 
+$ B_PM = 1.1 ! [T] remanent flux density 
+$ mu_PM = 1.049 ! relative permeability of PMs 
+$ H_PM = B_PM/(mu_PM*pi*4d-7) ! [A/m] magnetization of PMs 
+$ Id = 0 ! [A] d-axis current 
+$ Iq = 0 ! [A] q-axis current 
+$ Nph = 16 ! Number of phase turns 
+$ Scs = 8.97613e-005 ! [m^2] area of the coil side 
+
+Header 
+  CHECK KEYWORDS Warn 
+  Mesh DB "." "mesh_maia" 
+  Include Path "./materials"
+  Results Directory "res_maia" 
+End 
+
+Constants 
+  Permittivity of Vacuum = 8.8542e-12 
+End 
+
+Simulation 
+  Max Output Level = 30
+  Coordinate System = Cartesian 
+  Coordinate Scaling = 0.001 
+  Simulation Type = Transient 
+  Timestepping Method = BDF 
+  BDF Order = 2 
+  Timestep Sizes = $ 1/(w_el/2/pi)/(6*60) ! 360 samples per el. period 
+  Timestep Intervals = 61
+  ! Post File = case.vtu
+  Output Intervals = 1 
+  ! Use Mesh Names = Logical True
+  ! Interpolation Numeric Epsilon = Real 5.0e-9 
+End
+
+
+!###############################################################################
+!############################------ Materials -----#############################
+!###############################################################################
+
+Material 1 
+  Name = "Air" 
+  Relative Permeability = 1 
+End  
+
+Material 2 
+  Name = "Iron" 
+  Relative Permeability = 10000
+! actually B-H values are in the file BH (name is H-B, but values are in B-H format) 
+  ! H-B Curve = Variable coupled iter 
+  ! Real Monotone Cubic 
+  !   Include BH_aperam.dat
+  ! End 
+End 
+
+Material 3 
+  Name = "Magnet" 
+  Relative Permeability = $ mu_PM 
+
+  # Calculation of X and Y components of magnetization at each step time. Rotor speed is imposed, so
+  #   magnetization is time dependent
+  Magnetization 1 = Variable time, timestep size 
+    Real MATC "H_PM*cos(w_m*(tx(0)-tx(1)))" 
+  Magnetization 2 = Variable time, timestep size 
+    Real MATC "H_PM*sin(w_m*(tx(0)-tx(1)))" 
+End 
+
+!###############################################################################
+!########################------ Body Force Section -----########################
+!###############################################################################
+
+
+!rotation of the rotor 
+Body Force 1 
+  Name = "bodyForceRotation" 
+  Mesh Rotate 3 = Variable time, timestep size 
+    Real MATC "180/pi*w_m*(tx(0)-tx(1))" ! in degrees 
+End
+
+
+!###############################################################################
+!#############################------ Bodies -----###############################
+!###############################################################################
+
+Body 1 
+  Target Bodies(1) = 1
+  Name = "A+" 
+  Equation = 1 
+  Material = 1  ! Air here. ADd copper later
+End
+
+Body 2
+  Target Bodies(1) = 2
+  Name = "A-" 
+  Equation = 1 
+  Material = 1  ! Air here. ADd copper later
+End
+
+Body 3
+  Target Bodies(1) = 3
+  Name = "C-" 
+  Equation = 1 
+  Material = 1  ! Air here. ADd copper later
+End
+
+Body 4
+  Target Bodies(1) = 4
+  Name = "B+" 
+  Equation = 1 
+  Material = 1  ! Air here. ADd copper later
+End
+
+Body 5
+  Target Bodies(1) = 5
+  Name = "B-" 
+  Equation = 1 
+  Material = 1  ! Air here. ADd copper later
+End
+
+Body 6
+  Target Bodies(1) = 6
+  Name = "C+" 
+  Equation = 1 
+  Material = 1  ! Air here. ADd copper later
+End
+
+Body 7
+  Target Bodies(1) = 7
+  Name = "Stator Iron"
+  Equation = 1
+  Material = 2
+End
+
+Body 8
+  Target Bodies(1) = 8
+  Name = "Outer Air"
+  Equation = 1
+  Material = 1
+End
+
+Body 9
+  Target Bodies(6) = 14 15 16 17 18 19
+  Name = "Stator Air regions"
+  Equation = 1
+  Material = 1
+End
+
+Body 10
+  Target Bodies(1) = 13
+  Name = "Stator air gap"
+  Equation = 1
+  Material = 1
+End
+
+Body 11
+  Target Bodies(1) = 12
+  Name = "Rotor air gap"
+  Equation = 1
+  Material = 1
+  Body Force = 1
+End
+
+Body 12
+  Target Bodies(2) = 9 11
+  Name = "Magnet"
+  Equation = 1
+  Material = 3
+  Body Force = 1
+End
+
+Body 13
+  Target Bodies(1) = 10
+  Name = "Rotor axle"
+  Equation = 1
+  Material = 1
+  Body Force = 1
+End
+
+!###############################################################################
+!#########################------ Boundary section -----#########################
+!###############################################################################
+
+!outer boundary Dirichlet 
+Boundary Condition 1 
+  Target Boundaries(1) = 1
+  Name = "outerBoundary"
+  A = Real 0
+End 
+
+Boundary Condition 2
+  Target Boundaries(1) = 2
+  Name = "Sliding"
+  Discontinuous Boundary = Logical True
+  ! Save Line = Logical True -> ERROR:: SaveLine: Parent not associated!
+
+  ! Without this -> ERROR:: CreateDiscontMesh: Alternative strategy requires all parent elements!
+  Discontinuous Target Bodies(1) = 10
+
+  Mortar BC = 3
+  Rotational Projector = Logical True
+  Galerkin Projector = Logical True
+End
+
+
+!###############################################################################
+!##########################------ Solver section -----##########################
+!###############################################################################
+
+Equation 1
+  Name = "Model_Domain"
+  Active Solvers(3) = 1 2 3
+End
+
+Solver 1 !mesh rotation  
+  Exec Solver = Before Timestep 
+  Equation = MeshDeform 
+  Procedure = "RigidMeshMapper" "RigidMeshMapper" 
+End 
+
+Solver 2 ! solver for magnetic vector potential A [Vs/m]  
+  Exec Solver = Always 
+  Equation = MgDyn2D 
+  Procedure = "MagnetoDynamics2D" "MagnetoDynamics2D" 
+  Variable = A
+ 
+  ! Nonlinear System Convergence Tolerance = 1.0e-6
+  ! Nonlinear System Max Iterations = 20 
+  ! Nonlinear System Relaxation Factor = 1 
+
+
+  ! Linear System Solver = Iterative
+  ! Linear System Iterative Method = BiCGStab
+  BicgStabL Polynomial Degree = 4
+  Optimize Bandwidth = Logical True
+  Linear System Preconditioning =  ILU2
+  Linear System Max Iterations =  5000
+  Linear System Residual Output =  20
+  Linear System Convergence Tolerance =  1e-08
+  
+  Linear System Solver = Direct 
+  Linear System Direct Method = UMFPACK 
+End 
+
+Solver 3
+  Exec Solver = Always
+  Equation = MgDynPost
+  Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+  Potential Variable = "A"
+
+  Calculate Magnetic Field Strength = True
+  Calculate Magnetic Flux Density = True
+  Calculate Magnetic Vector Potential = Logical True
+
+  Calculate Elemental Fields = True
+  Calculate Nodal Fields = True
+
+  Discontinuous Galerkin = True
+
+  Linear System Solver = Direct
+  Linear System Iterative Method = MUMPS
+End
+
+Solver 4
+  Exec Solver = After Timestep
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  Output File Name = "case"
+  Vtu format = Logical True
+  Binary Output = Logical True
+
+  Save Elemental Fields = Logical True
+  Save Geometry Ids = True
+  Save Bulk Only = True
+
+  !=> Better visualization of disconinuous fields (interfers with connectivity filter)
+  ! Discontinuous Bodies = Logical True
+End
+
+Solver 5
+  Exec Solver = Never ! After Timestep -> Didnt work either way
+  Equation = SaveLine
+  Filename = "lines.dat"
+  Procedure = "SaveData" "SaveLine"
+
+  Coordinate Transformation = String "cartesian to cylindrical"
+  Coordinate Transformation Use Degrees = Logical True
+  Polyline Coordinates(2,3) = 0.010738 0.0 0.0 0.010738 180.0 0.0
+  Polyline Divisions(1) = Integer 181
+  
+  Variable 1 = Magnetic Flux Density 1
+  Variable 2 = Magnetic Flux Density 2
+  Variable 3 = Magnetic Flux Density 3
+  Variable 4 = Magnetic Flux Density e 1
+  Variable 5 = Magnetic Flux Density e 2
+  Variable 6 = Magnetic Flux Density e 3
+End
+
+Solver 6
+  Exec Solver = After Timestep
+  Filename = "scalars.dat"
+  Procedure = "SaveData" "SaveScalars"
+  Show Norm Index = 1
+End
+
+
+
+
+
+
