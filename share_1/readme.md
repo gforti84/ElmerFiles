@@ -57,7 +57,7 @@ We can alse define a procedure with problems with simplified geometries (derived
 For the case of the present example, the PMSM has 2 poles, so we only need to simulate half of it. Now, we need to define some additionl BC in FEMM:
 
 
-<img src="Figures/Sym_BC.png" width="960">
+<img src="Figures/Sym_BC_2.png" width="960">
 
 All boundaries are defined just to help with conversion, so they must be set as 'Prescribed A'. Using FEMM regular BC defintion would bring some problems (I think).  
 
