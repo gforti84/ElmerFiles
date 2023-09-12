@@ -3,7 +3,7 @@ How to import and use a mesh generated for FEMM.
 First, the electrical machine under evaluation is a high-speed surface-mounted synchronous PM machine. It has six slots and two poles. The magnet is protected with a stainless steel retaining sleeve.
   
 <!-- ![image](Figures/schPMmachine.png) -->
-<img src="Figures/schPMmachine.png" width="48">
+<img src="Figures/schPMmachine.png" width="480">
 
 
 
