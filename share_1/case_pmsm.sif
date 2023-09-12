@@ -13,9 +13,9 @@ $ Scs = 8.97613e-005 ! [m^2] area of the coil side
 
 Header 
   CHECK KEYWORDS Warn 
-  Mesh DB "." "mesh_maia" 
+  Mesh DB "." "mesh_pmsm" 
   Include Path "./materials"
-  Results Directory "res_maia" 
+  Results Directory "res_full" 
 End 
 
 Constants 
