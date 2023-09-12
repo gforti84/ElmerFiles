@@ -1,4 +1,6 @@
 # How to import and use a mesh generated for FEMM.  
+
+## Full geometry case
   
 First, the electrical machine under evaluation is a high-speed surface-mounted synchronous PM machine. It has six slots and two poles. The magnet is protected with a stainless steel retaining sleeve.
   
@@ -49,7 +51,7 @@ The results are illustrated as follows. Here, the sleeve is also modeled as a ma
 <img src="Figures/flux_dist.png" width="960">  
 <img src="Figures/plot_ag_absB.png" width="960">
 
-# Using symmetry to simplify the problem.
+## Using symmetry to simplify the problem.
 
 We can alse define a procedure with problems with simplified geometries (derived from symmetric flux distribution).  
 For the case of the present example, the PMSM has 2 poles, so we only need to simulate half of it. Now, we need to define some additionl BC in FEMM:
