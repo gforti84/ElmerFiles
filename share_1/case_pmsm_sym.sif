@@ -13,9 +13,9 @@ $ Scs = 8.97613e-005 ! [m^2] area of the coil side
 
 Header 
   CHECK KEYWORDS Warn 
-  Mesh DB "." "mesh_pmsm" 
+  Mesh DB "." "mesh_pmsm_sym" 
   Include Path "./materials"
-  Results Directory "res_full" 
+  Results Directory "res_sym"
 End 
 
 Constants 
@@ -23,14 +23,14 @@ Constants
 End 
 
 Simulation 
-  Max Output Level = 30
+  Max Output Level = 7 
   Coordinate System = Cartesian 
   Coordinate Scaling = 0.001 
   Simulation Type = Transient 
   Timestepping Method = BDF 
   BDF Order = 2 
   Timestep Sizes = $ 1/(w_el/2/pi)/(6*60) ! 360 samples per el. period 
-  Timestep Intervals = 61
+  Timestep Intervals = 61 
   ! Post File = case.vtu
   Output Intervals = 1 
   ! Use Mesh Names = Logical True
@@ -95,86 +95,58 @@ End
 
 Body 2
   Target Bodies(1) = 2
-  Name = "A-" 
+  Name = "C-" 
   Equation = 1 
   Material = 1  ! Air here. ADd copper later
 End
 
 Body 3
   Target Bodies(1) = 3
-  Name = "C-" 
+  Name = "B-" 
   Equation = 1 
   Material = 1  ! Air here. ADd copper later
 End
 
 Body 4
   Target Bodies(1) = 4
-  Name = "B+" 
-  Equation = 1 
-  Material = 1  ! Air here. ADd copper later
-End
-
-Body 5
-  Target Bodies(1) = 5
-  Name = "B-" 
-  Equation = 1 
-  Material = 1  ! Air here. ADd copper later
-End
-
-Body 6
-  Target Bodies(1) = 6
-  Name = "C+" 
-  Equation = 1 
-  Material = 1  ! Air here. ADd copper later
-End
-
-Body 7
-  Target Bodies(1) = 7
   Name = "Stator Iron"
   Equation = 1
   Material = 2
 End
 
-Body 8
-  Target Bodies(1) = 8
-  Name = "Outer Air"
-  Equation = 1
-  Material = 1
-End
-
-Body 9
-  Target Bodies(6) = 14 15 16 17 18 19
+Body 5
+  Target Bodies(4) = 5 11 12 13
   Name = "Stator Air regions"
   Equation = 1
   Material = 1
 End
 
-Body 10
-  Target Bodies(1) = 13
+Body 6
+  Target Bodies(1) = 10
   Name = "Stator air gap"
   Equation = 1
   Material = 1
 End
 
-Body 11
-  Target Bodies(1) = 12
+Body 7
+  Target Bodies(1) = 9
   Name = "Rotor air gap"
   Equation = 1
   Material = 1
   Body Force = 1
 End
 
-Body 12
-  Target Bodies(2) = 9 11
+Body 8
+  Target Bodies(2) = 6 8
   Name = "Magnet"
   Equation = 1
   Material = 3
   Body Force = 1
 End
 
-Body 13
-  Target Bodies(1) = 10
-  Name = "Rotor axle"
+Body 9
+  Target Bodies(1) = 7
+  Name = "Rotor Air regions"
   Equation = 1
   Material = 1
   Body Force = 1
@@ -195,14 +167,39 @@ Boundary Condition 2
   Target Boundaries(1) = 2
   Name = "Sliding"
   Discontinuous Boundary = Logical True
-  ! Save Line = Logical True -> ERROR:: SaveLine: Parent not associated!
-
-  ! Without this -> ERROR:: CreateDiscontMesh: Alternative strategy requires all parent elements!
-  Discontinuous Target Bodies(1) = 10
-
-  Mortar BC = 3
-  Rotational Projector = Logical True
+  Discontinuous Target Bodies(1) = 6
+  ! Save Line = True
+  Mortar BC = 7
+  Anti Rotational Projector = Logical True
   Galerkin Projector = Logical True
+End
+
+Boundary Condition 3
+  Target Boundaries(1) = 3
+	Name = "Rotor-Right"
+	Mortar BC = Integer 5
+	Mortar BC Static = Logical True
+	Anti Radial Projector = Logical True
+	Galerkin Projector = Logical True
+End
+
+Boundary Condition 4
+  Target Boundaries(1) = 4
+	Name = "Stator-Right"
+	Mortar BC = Integer 6
+	Mortar BC Static = Logical True
+	Anti Radial Projector = Logical True
+	Galerkin Projector = Logical True
+End
+
+Boundary Condition 5
+  Target Boundaries(1) = 5
+	Name = "Rotor-Left"
+End
+
+Boundary Condition 6
+  Target Boundaries(1) = 6
+	Name = "Stator-Left"
 End
 
 
@@ -211,8 +208,8 @@ End
 !###############################################################################
 
 Equation 1
-  Name = "Model_Domain"
-  Active Solvers(3) = 1 2 3
+	Name = "Model_Domain"
+	Active Solvers(5) = 1 2 3 4 5
 End
 
 Solver 1 !mesh rotation  
@@ -243,6 +240,8 @@ Solver 2 ! solver for magnetic vector potential A [Vs/m]
   
   Linear System Solver = Direct 
   Linear System Direct Method = UMFPACK 
+
+  Mortar BCs Additive =  Logical True
 End 
 
 Solver 3
@@ -267,7 +266,7 @@ End
 Solver 4
   Exec Solver = After Timestep
   Procedure = "ResultOutputSolve" "ResultOutputSolver"
-  Output File Name = "case_full"
+  Output File Name = "case_sym"
   Vtu format = Logical True
   Binary Output = Logical True
 
@@ -280,16 +279,10 @@ Solver 4
 End
 
 Solver 5
-  Exec Solver = Never ! After Timestep -> Didnt work either way
+  Exec Solver = Never ! After Timestep
   Equation = SaveLine
   Filename = "lines.dat"
   Procedure = "SaveData" "SaveLine"
-
-  Coordinate Transformation = String "cartesian to cylindrical"
-  Coordinate Transformation Use Degrees = Logical True
-  Polyline Coordinates(2,3) = 0.010738 0.0 0.0 0.010738 180.0 0.0
-  Polyline Divisions(1) = Integer 181
-  
   Variable 1 = Magnetic Flux Density 1
   Variable 2 = Magnetic Flux Density 2
   Variable 3 = Magnetic Flux Density 3
@@ -298,12 +291,12 @@ Solver 5
   Variable 6 = Magnetic Flux Density e 3
 End
 
-Solver 6
-  Exec Solver = After Timestep
-  Filename = "scalars.dat"
-  Procedure = "SaveData" "SaveScalars"
-  Show Norm Index = 1
-End
+Solver 6 !save scalar variables - torque T [Nm] 
+ Exec Solver = After Timestep 
+ Filename = "scalars.dat" 
+ Procedure = "SaveData" "SaveScalars" 
+ Show Norm Index = 1 
+End 
 
 
 
