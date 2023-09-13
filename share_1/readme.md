@@ -7,7 +7,7 @@ First, the electrical machine under evaluation is a high-speed surface-mounted s
 <!-- ![image](Figures/schPMmachine.png) -->
 <img src="Figures/schPMmachine.png" width="320">  
   
-For simulation in FEMM, only one Boundary condition is defined, that is the outer boundary (with ). Here I don’t need to rotated the model. So, in order to use this mesh in Elmer, a second boundary needs to be created for the sliding band (mortar BC).  
+For simulation in FEMM, only one Boundary condition is defined, that is the outer boundary (with A=0). Here I don’t need to rotated the model. So, in order to use this mesh in Elmer, a second boundary needs to be created for the sliding band (mortar BC).  
 <img src="Figures/femm2elmer_boundaries.png" width="540">  
   
 This boundary is created only for the mesh conversion process, so it can be defined as a ‘Prescribed A’ BC type.  
@@ -25,7 +25,7 @@ Now, just convert using ***‘ElmerGrid 11 2 your-file -autoclean’***, which r
 For comparison with FEMM:  
 <img src="Figures/femm_mesh.png" width="540">  
 
-One thing about this procedure is that the bodies must be identified manually for the definition of Elmer problem without GUI. 
+One thing about this procedure is that the bodies must be identified manually for the definition of Elmer problem without GUI. One could read this information from the fem file (your-file.fem). There is a section with the definitions of the Block parameters ([NumBlockLabels]) which correlates with material parameters, circuits and so on.
 
 The boundary for mortar BC is created and ca be used to define the problem within Elmer. Only issue that was found is that the boundary definition need the keyword **‘Discontinuous Target Bodies = Integer’** so the problem can run:
 ```
