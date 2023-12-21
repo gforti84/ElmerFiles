@@ -1,0 +1,21 @@
+Metadata for SaveLine file: results/lines.dat
+Elmer version: 9.0
+Elmer compilation date: 2023-12-16
+Solver input file: cogging.sif
+File started at: 2023/12/21 11:10:53
+Number of data nodes for each step
+  bc nodes: 848
+  polyline nodes: 1408
+  circle nodes: 0
+  isocurve nodes: 0
+Data on different columns
+  1: Timestep
+  2: Call count
+  3: Boundary condition
+  4: Node index
+  5: coordinate 1
+  6: coordinate 2
+  7: coordinate 3
+  8: magnetic flux density 1
+  9: magnetic flux density 2
+ 10: magnetic flux density 3
