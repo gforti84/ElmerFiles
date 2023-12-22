@@ -1,0 +1,292 @@
+! PMSM 2D Magneto-Static Simulation 
+! Parameters 
+$ w_m = 3000/60*2*pi ! [rad/s mech.] mechanical frequency 
+$ pp = 2 ! number of polepairs 
+$ w_el = w_m*pp ! [rad/s el.] electrical frequency 
+$ B_PM = 1.17 ! [T] remanent flux density 
+$ mu_PM = 1.06 ! relative permeability of PMs 
+$ H_PM = B_PM/(mu_PM*pi*4d-7) ! [A/m] magnetization of PMs 
+$ Id = 0 ! [A] d-axis current 
+$ Iq = 0 ! [A] q-axis current 
+$ Nph = 186 ! Number of phase turns 
+$ Scs = 0.00154555 ! [m^2] area of the coil side 
+
+Header 
+ CHECK KEYWORDS Warn 
+ Mesh DB "gmsh/pmsm" "." 
+ Include Path "" 
+ Results Directory "res_std" 
+End 
+
+Constants 
+ Permittivity of Vacuum = 8.8542e-12 
+End 
+
+Simulation 
+ Max Output Level = 3 
+ Coordinate System = Cartesian 
+ Coordinate Scaling = 0.001 
+ Simulation Type = Steady State 
+ Steady State Max Iterations = 1
+ 
+ ! Post File = case.vtu
+ Output Intervals = 1 
+!!!!!!!! mesh interpolation tolerances 
+ ! Interpolation Numeric Epsilon = Real 5.0e-9 
+End 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! Materials !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+Material 1 
+ Name = "Air" 
+ Relative Permeability = 1 
+End  
+
+Material 2 
+  Name = "Iron" 
+  H-B Curve = Variable coupled iter 
+  Real Monotone Cubic 
+    Include BH.txt
+  End  
+End 
+
+Material 3 
+ Name = "PM_right" 
+ Relative Permeability = $ mu_PM 
+ Magnetization 1 = $ H_PM
+ Magnetization 2 = Real 0
+End 
+
+Material 4 
+ Name = "PM_up" 
+ Relative Permeability = $ mu_PM 
+ Magnetization 1 = Real 0
+ Magnetization 2 = $ H_PM
+End 
+
+Material 5 
+ Name = "PM_left" 
+ Relative Permeability = $ mu_PM 
+ Magnetization 1 = $ -H_PM
+ Magnetization 2 = Real 0
+End 
+
+Material 6 
+ Name = "PM_down" 
+ Relative Permeability = $ mu_PM 
+ Magnetization 1 = Real 0
+ Magnetization 2 = $ -H_PM
+End 
+
+Material 7 
+ Name = "Wedge" 
+ Relative Permeability = 1 
+End 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! Boundary conditions !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+!outer boundary Dirichlet 
+Boundary Condition 1 
+ Target Boundaries(1) = 1 
+ Name = "Boundary_Outer" 
+ ! Potential Condition = 0 
+ ! Potential = 0 
+
+ A = Real 0
+End 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! Body Forces !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! Solver parameters !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+
+! solver for magnetic vector potential A [Vs/m] 
+Solver 1 
+ Equation = MgDyn2D 
+ Procedure = "MagnetoDynamics2D" "MagnetoDynamics2D" 
+ Exec Solver = Always 
+ Variable = A
+
+ Nonlinear System Convergence Tolerance = 1.0e-6 
+ Nonlinear System Max Iterations = 20 
+ Nonlinear System Relaxation Factor = 1 
+
+ Linear System Solver = Direct 
+ Linear System Direct Method = MUMPS 
+End 
+
+Solver 2
+  Exec Solver = Always
+  Equation = MgDynPost
+  Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+  Potential Variable = "A"
+
+  Calculate Magnetic Field Strength = True
+  Calculate Current Density = True
+  Calculate Magnetic Vector Potential = Logical True
+  Discontinuous Galerkin = True
+
+  Linear System Solver = Direct
+  Linear System Iterative Method = MUMPS
+End
+
+Solver 3
+  Exec Solver = After Timestep
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  Output File Name = "case"
+  Vtu format = Logical True
+  Binary Output = Logical True
+
+  Save Elemental Fields = Logical True
+  Save Geometry Ids = True
+  Save Bulk Only = True
+
+  !=> Better visualization of disconinuous fields (interfers with connectivity filter)
+  ! Discontinuous Bodies = Logical True
+End
+
+!save scalar variables - torque T [Nm] 
+Solver 4
+ Exec Solver = After Timestep 
+ Filename = "scalars.dat" 
+ Procedure = "SaveData" "SaveScalars" 
+ Show Norm Index = 1 
+End 
+
+Solver 5
+  Exec Solver = After Timestep ! Never ! After Timestep
+  Equation = SaveLine
+  Filename = "lines.dat"
+  Procedure = "SaveData" "SaveLine"
+
+  Coordinate Transformation = String "cartesian to cylindrical"
+  Coordinate Transformation Use Degrees = Logical True
+  Polyline Coordinates(2,2) = 0.0403 0.0 0.0403 180.0
+  Polyline Divisions(1) = Integer 1501
+  
+  Variable 1 = Magnetic Flux Density 1
+  Variable 2 = Magnetic Flux Density 2
+  Variable 3 = Magnetic Flux Density 3
+  ! Variable 4 = Magnetic Flux Density e 1
+  ! Variable 5 = Magnetic Flux Density e 2
+  ! Variable 6 = Magnetic Flux Density e 3
+End
+
+Equation 1 
+ Name = "ModelDomain" 
+ Active Solvers(2) = 1 2
+End 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!! Bodies are here !!!!!!!!!!!!!!!!!!!!!!!!!!! 
+Body 1 
+ Target Bodies(1) = 1 
+ Name = "U+" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 2 
+ Target Bodies(1) = 2 
+ Name = "U-" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 3 
+ Target Bodies(1) = 3 
+ Name = "V+" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 4 
+ Target Bodies(1) = 4 
+ Name = "V-" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 5 
+ Target Bodies(1) = 5 
+ Name = "W+" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 6 
+ Target Bodies(1) = 6 
+ Name = "W-" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 7 
+ Target Bodies(1) = 7 
+ Name = "stator lamination" 
+ Equation = 1 
+ Material = 2 
+End 
+
+Body 8 
+ Target Bodies(1) = 8 
+ Name = "rotor lamination" 
+ Equation = 1 
+ Material = 2 
+End 
+
+Body 9 
+ Target Bodies(1) = 9 
+ Name = "wedges" 
+ Equation = 1 
+ Material = 7 
+End 
+
+Body 10 
+ Target Bodies(1) = 10 
+ Name = "shaft" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 11 
+ Target Bodies(1) = 11 
+ Name = "PM1" 
+ Equation = 1 
+ Material = 3 
+End 
+
+Body 12 
+ Target Bodies(1) = 12 
+ Name = "PM2" 
+ Equation = 1 
+ Material = 6 
+End 
+
+Body 13 
+ Target Bodies(1) = 13 
+ Name = "PM3" 
+ Equation = 1 
+ Material = 5 
+End 
+
+Body 14 
+ Target Bodies(1) = 14 
+ Name = "PM4" 
+ Equation = 1 
+ Material = 4 
+End 
+
+Body 15 
+ Target Bodies(1) = 15 
+ Name = "stator airgap" 
+ Equation = 1 
+ Material = 1 
+End 
+
+Body 16 
+ Target Bodies(1) = 16 
+ Name = "rotor airgap" 
+ Equation = 1 
+ Material = 1 
+ r outer = Real 0.0406 
+ r inner = Real 0.040 
+End 

@@ -7,8 +7,19 @@ The case 1 is obtained from a simulation ran in FEMM and converted to Elmer. Ple
 [Elmer forum link](https://www.elmerfem.org/forum/viewtopic.php?t=8094)
 
 Case 1 plot (run case_1/plot_curves.ipynb to replicate)
-  
-![image](Figures/Fig_case1.png)  
+
+r = 10 mm:
+![image](Figures/Fig_case1_r10.png)  
+
+r = 10.738 mm (air-gap):
+![image](Figures/Fig_case1_rag.png)  
+
+r = 12 mm:
+![image](Figures/Fig_case1_r12.png)  
+
+line from (5,-5) to (15,5):
+![image](Figures/Fig_case1_line.png)  
+
 
 The case 2 is from Pavel tutorial for PMSM.
 
@@ -16,7 +27,7 @@ The case 2 is from Pavel tutorial for PMSM.
 
 Case 2 plot (run case_2/plot_curves.ipynb to replicate)
   
-![image](Figures/Fig_case2.png) 
+![image](Figures/Fig_case2_rag.png) 
 
 
 

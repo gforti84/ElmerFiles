@@ -1,12 +1,9 @@
 Metadata for SaveScalars file: res_pmsm_std/scalars.dat
 Elmer version: 9.0
-Elmer compilation date: 2023-12-16
+Elmer compilation date: 2023-12-20
 Solver input file: case_pmsm_std.sif
-File started at: 2023/12/21 11:20:33
+File started at: 2023/12/22 00:01:54
  
 Variables in columns of matrix: 
    1: res: eddy current power
    2: res: electromagnetic field energy
-   3: res: air gap torque
-   4: res: inertial volume
-   5: res: inertial moment

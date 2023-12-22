@@ -3,7 +3,7 @@
 $ w_m = 3600/60*2*pi ! [rad/s mech.] mechanical frequency 
 $ pp = 1 ! number of polepairs 
 $ w_el = w_m*pp ! [rad/s el.] electrical frequency 
-$ B_PM = 1.1 ! [T] remanent flux density 
+$ B_PM = 1.11 ! [T] remanent flux density 
 $ mu_PM = 1.049 ! relative permeability of PMs 
 $ H_PM = B_PM/(mu_PM*pi*4d-7) ! [A/m] magnetization of PMs 
 $ Id = 0 ! [A] d-axis current 
@@ -26,11 +26,9 @@ Simulation
   Max Output Level = 7 
   Coordinate System = Cartesian 
   Coordinate Scaling = 0.001 
-  Simulation Type = Transient 
-  Timestepping Method = BDF 
-  BDF Order = 2 
-  Timestep Sizes = $ 1/(w_el/2/pi)/(6*60) ! 360 samples per el. period 
-  Timestep Intervals = 1 
+  Simulation Type = Steady State 
+  Steady State Max Iterations = 1
+  
   ! Post File = case.vtu
   Output Intervals = 1 
   ! Use Mesh Names = Logical True
@@ -49,31 +47,20 @@ End
 
 Material 2 
   Name = "Iron" 
-  Relative Permeability = 10000
+  Relative Permeability = 100000
 End 
 
 Material 3 
   Name = "Magnet" 
   Relative Permeability = $ mu_PM 
 
-  # Calculation of X and Y components of magnetization at each step time. Rotor speed is imposed, so
-  #   magnetization is time dependent
-  Magnetization 1 = Variable time, timestep size 
-    Real MATC "H_PM*cos(w_m*(tx(0)-tx(1)))" 
-  Magnetization 2 = Variable time, timestep size 
-    Real MATC "H_PM*sin(w_m*(tx(0)-tx(1)))" 
+  Magnetization 1 = $ H_PM
+  Magnetization 2 = Real 0
 End 
 
 !###############################################################################
 !########################------ Body Force Section -----########################
 !###############################################################################
-
-!rotation of the rotor 
-Body Force 1 
-  Name = "bodyForceRotation" 
-  Mesh Rotate 3 = Variable time, timestep size 
-    Real MATC "180/pi*w_m*(tx(0)-tx(1))" ! in degrees 
-End
 
 
 !###############################################################################
@@ -155,7 +142,6 @@ Body 11
   Name = "Rotor air gap"
   Equation = 1
   Material = 1
-  Body Force = 1
 End
 
 Body 12
@@ -163,15 +149,13 @@ Body 12
   Name = "Magnet"
   Equation = 1
   Material = 3
-  Body Force = 1
 End
 
 Body 13
   Target Bodies(1) = 10
   Name = "Rotor axle"
   Equation = 1
-  Material = 1
-  Body Force = 1
+  Material = 2
 End
 
 !###############################################################################
@@ -187,25 +171,6 @@ Boundary Condition 1
   A = Real 0
 End 
 
-Boundary Condition 2
-  ! Based on Pavel PMSM example
-  ! Also: https://github.com/ElmerCSC/elmerfem/tree/devel/fem/tests/DisContBoundaryDoubleMortar
-
-  ! Tried different settings without success
-
-  Target Boundaries(1) = 2
-  Name = "Sliding"
-  Discontinuous Boundary = Logical True
-  ! Save Line = Logical True -> ERROR:: SaveLine: Parent not associated!
-
-  ! Without this -> ERROR:: CreateDiscontMesh: Alternative strategy requires all parent elements!
-  Discontinuous Target Bodies(1) = 10
-
-  Mortar BC = 3
-  Rotational Projector = Logical True
-  Galerkin Projector = Logical True
-End
-
 
 !###############################################################################
 !##########################------ Solver section -----##########################
@@ -213,16 +178,10 @@ End
 
 Equation 1
 	Name = "Model_Domain"
-	Active Solvers(3) = 1 2 3
+	Active Solvers(2) = 1 2
 End
 
-Solver 1 !mesh rotation  
-  Exec Solver = Before Timestep 
-  Equation = MeshDeform 
-  Procedure = "RigidMeshMapper" "RigidMeshMapper" 
-End 
-
-Solver 2 ! solver for magnetic vector potential A [Vs/m]  
+Solver 1 ! solver for magnetic vector potential A [Vs/m]  
   Exec Solver = Always 
   Equation = MgDyn2D 
   Procedure = "MagnetoDynamics2D" "MagnetoDynamics2D" 
@@ -246,7 +205,7 @@ Solver 2 ! solver for magnetic vector potential A [Vs/m]
   Linear System Direct Method = MUMPS 
 End 
 
-Solver 3
+Solver 2
   Exec Solver = Always
   Equation = MgDynPost
   Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
@@ -265,7 +224,7 @@ Solver 3
   Linear System Iterative Method = MUMPS
 End
 
-Solver 4
+Solver 3
   Exec Solver = After Timestep
   Procedure = "ResultOutputSolve" "ResultOutputSolver"
   Output File Name = "case"
@@ -280,24 +239,32 @@ Solver 4
   ! Discontinuous Bodies = Logical True
 End
 
-Solver 5
+Solver 4
   Exec Solver = After Timestep
   Filename = "scalars.dat"
   Procedure = "SaveData" "SaveScalars"
   Show Norm Index = 1
 End
 
-Solver 6
+Solver 5
   Exec Solver = After Timestep ! -> Didnt work either way
   Equation = SaveLine
   Filename = "lines.dat"
   Procedure = "SaveData" "SaveLine"
 
-  Coordinate Transformation = String "cartesian to cylindrical"
-  Coordinate Transformation Use Degrees = Logical True
-  Polyline Coordinates(2,3) = 0.010738 0.0 0.0 0.010738 180.0 0.0
+  !! rag = 0.010738
+
+  ! Coordinate Transformation = String "cartesian to cylindrical"
+  ! Coordinate Transformation Use Degrees = Logical True
+  ! Polyline Coordinates(2,3) = 0.012 0.0 0.0 0.012 180.0 0.0
+  ! Polyline Divisions(1) = Integer 1501
+  
+  ! line plot:
+  Polyline Coordinates(2,2) = 0.005 -0.005 0.015 0.005
   Polyline Divisions(1) = Integer 1501
   
+
+
   Variable 1 = Magnetic Flux Density 1
   Variable 2 = Magnetic Flux Density 2
   Variable 3 = Magnetic Flux Density 3

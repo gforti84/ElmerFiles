@@ -1,0 +1,20 @@
+Metadata for SaveLine file: res_std/lines.dat
+Elmer version: 9.0
+Elmer compilation date: 2023-12-20
+Solver input file: pmsm_std.sif
+File started at: 2023/12/21 22:53:05
+Number of data nodes for each step
+  bc nodes: 0
+  polyline nodes: 1502
+  circle nodes: 0
+  isocurve nodes: 0
+Data on different columns
+  1: Call count
+  2: Boundary condition
+  3: Node index
+  4: coordinate 1
+  5: coordinate 2
+  6: coordinate 3
+  7: magnetic flux density 1
+  8: magnetic flux density 2
+  9: magnetic flux density 3
