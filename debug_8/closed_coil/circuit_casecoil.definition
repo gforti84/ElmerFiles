@@ -1,0 +1,108 @@
+! -----------------------------------------------------------------------------
+! ElmerFEM Circuit Generated: November 04, 2022
+! -----------------------------------------------------------------------------
+
+! -----------------------------------------------------------------------------
+! Number of Circuits in Model
+! -----------------------------------------------------------------------------
+$ Circuits = 1
+
+! -----------------------------------------------------------------------------
+! Parameters
+! -----------------------------------------------------------------------------
+
+! General Parameters 
+$ Is = 1e5
+$ unit = 1e-3
+
+! Vou iniciar esse teste sem calcular nenhuma resistência. O Elmer deriva da
+!    área da região da bobina
+
+! Parameters in Component 1: Coil
+$ Ns_Wire1 = 1	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+$ Rs_Wire1 = 1e-6	 ! Sector/Symmetry Coefficient (e.g. 4 is 1/4 of the domain)
+$ Ae_Wire1 = 0.001 	 ! Electrode Area (dummy for now change as required)
+
+! -----------------------------------------------------------------------------
+! Matrix Size Declaration and Matrix Initialization
+! -----------------------------------------------------------------------------
+$ C.1.variables = 4
+$ C.1.perm = zeros(C.1.variables)
+$ C.1.A = zeros(C.1.variables,C.1.variables)
+$ C.1.B = zeros(C.1.variables,C.1.variables)
+
+
+! -----------------------------------------------------------------------------
+! Dof/Unknown Vector Definition
+! -----------------------------------------------------------------------------
+$ C.1.name.1 = "i_Vs"
+$ C.1.name.2 = "i_component(1)"
+$ C.1.name.3 = "v_Vs"
+$ C.1.name.4 = "v_component(1)"
+
+! -----------------------------------------------------------------------------
+! Source Vector Definition
+! -----------------------------------------------------------------------------
+$ C.1.source.1 = "Ipri_Source"
+$ C.1.B(0,0) = 1
+
+! -----------------------------------------------------------------------------
+! KCL Equations
+! -----------------------------------------------------------------------------
+$ C.1.B(1,0) = 1
+$ C.1.B(1,1) = -1
+
+! -----------------------------------------------------------------------------
+! KVL Equations
+! -----------------------------------------------------------------------------
+$ C.1.B(2,2) = -1
+$ C.1.B(2,3) = 1
+
+
+! -----------------------------------------------------------------------------
+! Component Equations
+! -----------------------------------------------------------------------------
+
+
+! -----------------------------------------------------------------------------
+! Additions in SIF file
+! -----------------------------------------------------------------------------
+
+Component 1
+    Name = "Coil"
+    Master Bodies(1) = Integer 1
+
+    ! -> Results with massive here diverges
+    ! Coil Type = String Massive
+    ! <-
+    
+
+    ! -> Stranded coil:
+    Coil Type = String Stranded
+    Number of Turns = Real $ Ns_Wire1
+    Resistance = Real $ Rs_Wire1
+    ! <-
+    
+    ! Additions for 3D Coil
+    Coil Use W Vector = Logical True
+    W Vector Variable Name = String CoilCurrent e
+
+    Electrode Area = Real $ Ae_Wire1
+    
+    ! Activate Constraint = Logical True
+End
+
+
+
+! -----------------------------------------------------------------------------
+! Sources in SIF 
+! -----------------------------------------------------------------------------
+
+Body Force 1
+    Ipri_Source re = Real $ Is
+    Ipri_Source im = Real $ 0
+End
+
+! -----------------------------------------------------------------------------
+! End of Circuit
+! -----------------------------------------------------------------------------

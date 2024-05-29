@@ -1,0 +1,247 @@
+Header
+    CHECK KEYWORDS Warn
+    Mesh DB "." "mesh"
+    Include Path ""
+    ! Results Directory "res_wp_std" ! Folder for stranded coil results
+    Results Directory "res_wp_ms" ! Folder for massive coil results
+End
+
+!---------------------------------------------------------
+!Parameters
+!---------------------------------------------------------
+$ freq = 10
+$ omega = 2*pi*freq
+
+Include mesh/mesh.names
+Include circuit_casewpot.definition
+
+
+Simulation
+    Max Output Level = 7
+    Coordinate System = Cartesian
+    Coordinate Mapping(3) = 1 2 3
+    Coordinate Scaling = 1e-3
+    
+    Simulation Type = Steady state
+    Angular Frequency = $ omega
+    Output Intervals(1) = 1
+    Steady State Max Iterations = 1
+    Use Mesh Names = True
+End
+
+Constants
+    Permittivity of Vacuum = 8.85418781e-12
+    Permeability of Vacuum = 1.25663706e-6
+End
+
+Body 1
+    Target Bodies(1) = $ Coil
+    Equation = 1
+    Material = 1
+    Body Force = 1 
+End
+
+Body 2
+    Target Bodies(1) = $ Core
+    Name = "Core"
+    Equation = 2
+    Material = 2
+End
+
+Body 3
+    Name = "Air"
+    Target Bodies(1) = $ Air
+    Equation = 2
+    Material = 3
+End
+
+! -- MATERIAL PROPERTIES --
+Material 1
+    Name = "Copper"
+    Electric Conductivity = 58e6
+    Relative Permeability = Real 1.0
+    Relative Permittivity = Real 1.0
+End
+
+Material 2
+    Name = "Core"
+    Relative Permeability = Real 10000
+    Relative Permittivity = Real 1.0
+    Electric Conductivity = Real 0.0
+End
+
+Material 3
+    Name = "Air"
+    Relative Permeability = Real 1.0
+    Relative Permittivity = Real 1.0
+    Electric Conductivity = Real 0.0
+End
+
+
+Boundary Condition 1
+    Target Boundaries(2) = $ Boundary Air_Cut
+    Name = "Air"
+    AV re {e} = Real 0
+    AV im {e} = Real 0
+End
+
+Boundary Condition 2
+    Target Boundaries(1) = $ Core_Cut
+    Name = "Core"
+    AV re {e} = Real 0
+    AV im {e} = Real 0
+    AV re = Real 0.0
+    AV im = Real 0.0
+End
+
+Boundary Condition 3
+    Target Boundaries(1) = $ Coil_pos
+    Name = "PriCoilIn"
+    AV re {e} = Real 0
+    AV im {e} = Real 0
+    
+    W = Real 1
+End
+
+Boundary Condition 4
+    Target Boundaries(1) = $ Coil_neg
+    Name = "PriCoilOut"
+    AV re {e} = Real 0
+    AV im {e} = Real 0
+    
+    W = Real 0
+End
+
+!-- EQUATIONS --
+Equation 1
+    Name = "MgDynCoil"
+    Active Solvers(5) = 1 2 3 4 5
+End
+
+Equation 2
+    Name = "MgDynNonCoil"
+    Active Solvers(2) = 3 4
+End
+
+!-- SOLVERS --
+Solver 1
+   Procedure = "WPotentialSolver" "Wsolve"
+   Equation = "Wire direction"
+   Variable = W
+   Linear System Solver = Iterative
+   Linear System Iterative Method = CG
+   Linear System Max Iterations = 10000
+   Linear System Convergence Tolerance = 1.0e-10
+   Linear System Preconditioning = ILU0
+   Linear System Abort Not Converged = True
+   Linear System Residual Output = 100
+End
+
+Solver 2
+    Equation = Circuits
+    Variable = X
+    No Matrix = Logical True  
+    Procedure = "CircuitsAndDynamics" "CircuitsAndDynamicsHarmonic"
+End
+
+Solver 3  !---- MagnetoDynamics, WhitneyAVSolver
+    Equation = MGDynamics
+    Variable = AV[AV re:1 AV im:1]
+    Procedure = "MagnetoDynamics" "WhitneyAVHarmonicSolver"
+
+    Export Lagrange Multiplier = Logical True
+
+    Linear System Symmetric = Logical True
+    Linear System Complex = Logical True
+    Linear System Solver = Iterative
+    Linear System Iterative Method = Bicgstabl
+    Linear System preconditioning = Circuit
+    Linear System Convergence Tolerance = 1.e-8
+    Linear System Max Iterations = 2000
+    Linear System Residual Output = 50
+    BicgStabL Polynomial Degree = 4
+    Linear System Abort not Converged = False
+    Steady State Convergence Tolerance = 1e-09
+    Newton-Raphson Iteration = Logical True
+    nonlinear system max iterations = 10
+    nonlinear system convergence tolerance = 1e-6
+    !Linear System Precondition Recompute = 1
+    !Nonlinear System Relaxation Factor = Real 0.75
+    Linear System Robust = True
+   
+End
+
+Solver 4  !---- MagnetoAndDynamics, MagnetoDynamicsCalcFields
+    Equation = MGDynamicsCalc
+    Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+    Potential Variable = String "AV"
+
+    Calculate Current Density = Logical True
+    ! Calculate Joule Heating = Logical True
+    ! Calculate Relative Permeability = Logical True
+    ! Calculate Harmonic Loss = Logical True
+
+    Calculate Nodal Fields = True
+
+    Linear System Symmetric = True
+    Steady State Convergence Tolerance = 0
+    Linear System Solver = "Iterative"
+    Linear System Preconditioning = None
+    Linear System Residual Output = 1000
+    Linear System Max Iterations = 5000
+    Linear System Iterative Method = CG
+    Steady State Convergence Tolerance = 1e-8
+    Linear System Convergence Tolerance = 1.0e-8
+    Separate Magnetic Energy = Logical True
+End
+
+Solver 5  !---- CircuitsAndDynamics, CircuitsOutput
+    Exec Solver = After timestep
+    Equation = Circuits Output
+    Procedure = "CircuitsAndDynamics" "CircuitsOutput"
+End
+
+Solver 6
+    Equation = String "ResultOutput" 
+    Procedure = "ResultOutputSolve" "ResultOutputSolver"
+    Output File Name =  "harm"
+    ! Gmsh Format = Logical True
+    Vtu Format = Logical True
+    Save Geometry Ids = Logical True
+    Save Bulk Only = Logical True
+
+    !=> Better visualization of disconinuous fields (interfers with connectivity filter)
+    ! As a side effect this solver will smooth the elemental fields 
+    ! Discontinuous Bodies = Logical True
+End
+
+Solver 7
+    Exec Solver = After Timestep
+    Procedure = "SaveData" "SaveScalars"
+    Filename = res_3d_h.dat
+End
+
+Solver 8
+    Exec Solver = After Timestep
+    Equation = SaveLine
+    Procedure = "SaveData" "SaveLine"
+    Filename = "line.dat"
+    Polyline Coordinates(2,3) = 0 -0.07 0.0 0.0 0.07 0.0
+    Polyline Divisions(1) = 1500
+
+    ! If i don't define these variables, results are VERY wrong.
+    Variable 1 = Magnetic Flux Density re e 1
+    Variable 2 = Magnetic Flux Density re e 2
+    Variable 3 = Magnetic Flux Density re e 3
+    Variable 4 = Magnetic Flux Density im e 1
+    Variable 5 = Magnetic Flux Density im e 2
+    Variable 6 = Magnetic Flux Density im e 3
+    Variable 7 = current density re e 1
+    Variable 8 = current density re e 2
+    Variable 9 = current density re e 3
+    Variable 10 = coilcurrent e 1
+    Variable 11 = coilcurrent e 2
+    Variable 12 = coilcurrent e 3
+End
+
+

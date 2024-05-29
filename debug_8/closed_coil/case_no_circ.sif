@@ -1,0 +1,259 @@
+! Results are VERY off
+
+Header
+    CHECK KEYWORDS Warn
+    Mesh DB "." "mesh"
+    Results Directory "res_cl_nc"
+End
+
+
+include ./MESH/mesh.names
+
+!---------------------------------------------------------
+!Parameters
+!---------------------------------------------------------
+$ omega = 2*pi*10
+
+Simulation
+    Coordinate System = String "Cartesian 3D"
+    Coordinate Mapping(3) = 1 2 3
+    Coordinate Scaling = 1e-3
+
+    Simulation Type = String "Steady"
+    Steady State Max Iterations = 1
+    Output Intervals(1) = 1
+
+    !----------- Harmonic Simulation Parameters ------------
+    Angular Frequency = $ omega
+    !-------------------------------------------------------
+
+    Max Output Level = 7
+End
+
+Constants
+    Permittivity of Vacuum = 8.8542e-12
+    Permeability of Vacuum = 1.256e-6
+End
+
+! -- BODIES --
+Body 1
+    Name = "Coil"
+    Target Bodies(1) = $ Coil
+    Equation = 1
+    Material = 1
+    Body Force = 1 
+End
+
+Body Force 1
+    Name = "current source"
+
+    ! Current Density 1 = Equals "CoilCurrent e 1"
+    ! Current Density 2 = Equals "CoilCurrent e 2"
+    ! Current Density 3 = Equals "CoilCurrent e 3"
+End
+
+Component 1 
+    Name = String "Coil"
+    Coil Type = String "Massive"
+    Master Bodies(1) = Integer 1
+    Desired Current Density = Real 1e8
+    Coil Normal(3) = 0.0 0.0 1.0
+End 
+
+Body 2
+  Name = "Core"
+  Target Bodies(1) = $ Core
+  Equation = 2
+  Material = 2
+End
+
+Body 3
+  Name = "Air"
+  Target Bodies(1) = $ Air
+  Equation = 2
+  Material = 3
+End
+
+! -- MATERIAL PROPERTIES --
+Material 1
+    Name = "Copper"
+    Electric Conductivity = 58e6
+    Relative Permeability = Real 1.0
+    Relative Permittivity = Real 1.0
+End
+
+Material 2
+    Name = "Core"
+    Relative Permeability = Real 10000
+    Relative Permittivity = Real 1.0
+    Electric Conductivity = Real 0.0
+End
+
+Material 3
+    Name = "Air"
+    Relative Permeability = Real 1.0
+    Relative Permittivity = Real 1.0
+    Electric Conductivity = Real 0.0
+End
+
+Boundary Condition 1
+    Target Boundaries(1) = 3
+    Name = "Inf"
+
+    AV re {e} = Real 0.0
+    AV im {e} = Real 0.0
+End
+
+!-- EQUATIONS --
+Equation 1
+    Name = "MagDyn Coil Only"
+    Active Solvers(3) = 1 2 3
+End
+
+Equation 2
+    Name = "MagDyn in FeSi + Air"
+    Active Solvers(2) = 2 3
+End
+
+!-- SOLVERS --
+Solver 1
+    Exec Solver = "before all"
+    Equation = "CoilSolver"
+    Procedure = "CoilSolver" "CoilSolver"
+
+    Linear System Solver = "Iterative"
+    Linear System Preconditioning = ILU1
+    Linear System Max Iterations = 1000
+    Linear System Convergence Tolerance = 1e-10
+    Linear System Iterative Method = BiCGStab
+    Linear System Residual Output = 10
+    Steady State Convergence Tolerance = 1e-06
+
+    Normalize Coil Current = Logical True 
+    Nonlinear System Consistent Norm = Logical True
+    
+    ! This will calculate elemental current density.
+    Calculate Elemental Fields = Logical True
+
+    Coil Closed = Logical True
+    Narrow Interface = Logical True
+
+    !-> using component
+    ! Desired Current Density = Real -1e8
+    ! Coil Normal(3) = 0.0 0.0 1.0
+    
+    ! We can make the current divergence free either here or within AV solver.
+    ! Here it is done locally for each element. This is computationally
+    ! more economical and therefore preferable - if it works.
+    Fix Input Current Density = True
+End
+
+Solver 2
+    Equation = MGDynamics
+    Variable = AV[AV re:1 AV im:1]
+    Procedure = "MagnetoDynamics" "WhitneyAVHarmonicSolver"
+
+    Linear System Solver = Iterative
+    Linear System Preconditioning = ILU
+    Linear System Residual Output = 20
+    Linear System Max Iterations = 10000
+    Linear System Iterative Method = BiCGStabl
+    Linear System Convergence Tolerance = 1e-06  ! diverges with 1e-08
+    BicgStabl Polynomial Degree = 4
+    Linear System GCR Restart = 100
+    Idrs Parameter = 4
+    Linear System Robust = True
+    Linear System Abort Not Converged = False
+
+    ! Automatically use "CoilCurrent e" as defined by Solver 1.
+    ! This eliminates the need for a separate body force section
+    ! The "CoilCurrent e" field is used directly.
+    Use Elemental CoilCurrent = Logical True
+
+    ! As this is fixed already no need to double fix. 
+    ! Not active when using potential as source
+    Fix Input Current Density = False
+
+    
+    ! Optionally one can use different scaling. Sometimes gives better results. 
+    ! Linear System Row Equilibration = Logical True
+    Nonlinear System Consistent Norm = Logical True
+End
+
+Solver 3
+    Equation = MGDynamicsCalc
+    Procedure = "MagnetoDynamics" "MagnetoDynamicsCalcFields"
+    Potential Variable = String "AV"
+
+    Steady State Convergence Tolerance = 1.0e-6
+    
+    Linear System Solver = Iterative
+    Linear System Symmetric = True
+    Linear System Iterative Method = CG
+    Linear System Max Iterations = 5000
+    Linear System Convergence Tolerance = 1.0e-8
+    Linear System Preconditioning = ILU0
+    Linear System ILUT Tolerance = 1.0e-3
+    Linear System Abort Not Converged = False
+    ! Linear System Residual Output = 1
+    ! Linear System Precondition Recompute = 1
+    ! Discontinuous Bodies = Logical True
+    
+    Calculate Current Density = Logical True
+    Calculate Nodal Fields = True
+    Calculate Elemental Fields = True
+End
+
+
+
+Solver 4
+    Equation = String "ResultOutput" 
+    Procedure = "ResultOutputSolve" "ResultOutputSolver"
+    Output File Name =  "harm"
+    ! Gmsh Format = Logical True
+    Vtu Format = Logical True
+    Save Geometry Ids = Logical True
+    Save Bulk Only = Logical True
+
+    !=> Better visualization of disconinuous fields (interfers with connectivity filter)
+    ! As a side effect this solver will smooth the elemental fields 
+    ! Discontinuous Bodies = Logical True
+End
+
+Solver 5
+    Exec Solver = After Timestep
+    Procedure = "SaveData" "SaveScalars"
+    Filename = res_3d_h.dat
+End
+
+Solver 6
+    Exec Solver = After Timestep
+    Equation = SaveLine
+    Procedure = "SaveData" "SaveLine"
+    Filename = "line.dat"
+    Polyline Coordinates(2,3) = 0 -0.07 0.0 0.0 0.07 0.0
+    Polyline Divisions(1) = 1500
+
+    ! If i don't define these variables, results are VERY wrong.
+    Variable 1 = Magnetic Flux Density re e 1
+    Variable 2 = Magnetic Flux Density re e 2
+    Variable 3 = Magnetic Flux Density re e 3
+    Variable 4 = current density re e 1
+    Variable 5 = current density re e 2
+    Variable 6 = current density re e 3
+    Variable 7 = coilcurrent e 1
+    Variable 8 = coilcurrent e 2
+    Variable 9 = coilcurrent e 3
+End
+
+Solver 7
+    Exec Solver = After Timestep
+    Equation = SaveLine_nOK
+    Procedure = "SaveData" "SaveLine"
+    Filename = "line_nOK.dat"
+    Polyline Coordinates(2,3) = 0 -0.07 0.0 0.0 0.07 0.0
+    Polyline Divisions(1) = 1500
+End
+
+
+
